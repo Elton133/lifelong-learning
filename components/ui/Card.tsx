@@ -8,7 +8,7 @@ interface CardProps extends HTMLAttributes<HTMLDivElement> {
 export function Card({ className, variant = 'default', children, ...props }: CardProps) {
   const variants = {
     default: 'bg-white dark:bg-zinc-900',
-    elevated: 'bg-white dark:bg-zinc-900 shadow-lg',
+    elevated: 'bg-white dark:bg-zinc-900 shadow-sm',
     outline: 'bg-transparent border border-border',
   };
 
