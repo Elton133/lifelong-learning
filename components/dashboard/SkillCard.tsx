@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import { Progress } from '@/components/ui/Progress';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
@@ -12,9 +13,10 @@ import { ChevronRight, TrendingUp } from 'lucide-react';
 interface SkillCardProps {
   userSkill: UserSkill;
   className?: string;
+  index?: number;
 }
 
-export function SkillCard({ userSkill, className }: SkillCardProps) {
+export function SkillCard({ userSkill, className, index = 0 }: SkillCardProps) {
   const skill = userSkill.skill;
   
   if (!skill) return null;
@@ -27,50 +29,62 @@ export function SkillCard({ userSkill, className }: SkillCardProps) {
   };
 
   return (
-    <Card variant="outline" className={cn('hover:shadow-md transition-shadow', className)}>
-      <CardHeader className="pb-2">
-        <div className="flex items-start justify-between">
-          <div>
-            <CardTitle className="text-base">{skill.name}</CardTitle>
-            <div className="flex items-center gap-2 mt-1">
-              {skill.category && (
-                <Badge size="sm" className={categoryColors[skill.category]}>
-                  {skill.category}
+    <motion.div
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: index * 0.1 }}
+      whileHover={{ scale: 1.01 }}
+    >
+      <Card variant="outline" className={cn('hover:shadow-lg transition-all duration-300', className)}>
+        <CardHeader className="pb-2">
+          <div className="flex items-start justify-between">
+            <div>
+              <CardTitle className="text-base">{skill.name}</CardTitle>
+              <div className="flex items-center gap-2 mt-1">
+                {skill.category && (
+                  <Badge size="sm" className={categoryColors[skill.category]}>
+                    {skill.category}
+                  </Badge>
+                )}
+                <Badge size="sm" className={getMasteryBadgeClass(userSkill.mastery_level)}>
+                  {getMasteryLabel(userSkill.mastery_level)}
                 </Badge>
-              )}
-              <Badge size="sm" className={getMasteryBadgeClass(userSkill.mastery_level)}>
-                {getMasteryLabel(userSkill.mastery_level)}
-              </Badge>
+              </div>
             </div>
-          </div>
-          {userSkill.growth_velocity && userSkill.growth_velocity > 2 && (
-            <div className="flex items-center gap-1 text-green-600 text-sm">
-              <TrendingUp className="w-4 h-4" />
-              <span>+{userSkill.growth_velocity.toFixed(1)}</span>
-            </div>
-          )}
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Mastery</span>
-            <span className="font-medium">{userSkill.mastery_level}%</span>
-          </div>
-          <Progress 
-            value={userSkill.mastery_level} 
-            size="md" 
-            color={getMasteryColor(userSkill.mastery_level)}
-          />
-          <div className="flex items-center justify-between text-xs text-muted-foreground pt-1">
-            <span>Practiced {userSkill.practice_count} times</span>
-            {userSkill.last_practiced && (
-              <span>Last: {formatRelativeTime(userSkill.last_practiced)}</span>
+            {userSkill.growth_velocity && userSkill.growth_velocity > 2 && (
+              <motion.div 
+                className="flex items-center gap-1 text-green-600 text-sm"
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.3 }}
+              >
+                <TrendingUp className="w-4 h-4" />
+                <span>+{userSkill.growth_velocity.toFixed(1)}</span>
+              </motion.div>
             )}
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Mastery</span>
+              <span className="font-medium">{userSkill.mastery_level}%</span>
+            </div>
+            <Progress 
+              value={userSkill.mastery_level} 
+              size="md" 
+              color={getMasteryColor(userSkill.mastery_level)}
+            />
+            <div className="flex items-center justify-between text-xs text-muted-foreground pt-1">
+              <span>Practiced {userSkill.practice_count} times</span>
+              {userSkill.last_practiced && (
+                <span>Last: {formatRelativeTime(userSkill.last_practiced)}</span>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 }
 
@@ -97,8 +111,8 @@ export function SkillsPreview({ skills, className }: SkillsPreviewProps) {
         </Link>
       </div>
       <div className="grid gap-3">
-        {topSkills.map(skill => (
-          <SkillCard key={skill.id} userSkill={skill} />
+        {topSkills.map((skill, index) => (
+          <SkillCard key={skill.id} userSkill={skill} index={index} />
         ))}
       </div>
     </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import { Play, HelpCircle, Code, MessageSquare, MousePointer, Clock, ChevronRight } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
@@ -32,56 +33,66 @@ const contentTypeLabels: Record<string, string> = {
 
 export function PlaylistCard({ content, index, className }: PlaylistCardProps) {
   return (
-    <Card 
-      variant="outline" 
-      className={cn(
-        'group hover:border-primary/50 hover:shadow-md transition-all duration-200',
-        className
-      )}
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: (index || 0) * 0.1 }}
+      whileHover={{ scale: 1.01 }}
     >
-      <CardHeader className="pb-2">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-start gap-3">
-            {index !== undefined && (
-              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-sm font-medium shrink-0">
-                {index + 1}
-              </span>
-            )}
-            <div>
-              <CardTitle className="text-base group-hover:text-primary transition-colors">
-                {content.title}
-              </CardTitle>
-              <CardDescription className="line-clamp-2 mt-1">
-                {content.description}
-              </CardDescription>
+      <Card 
+        variant="outline" 
+        className={cn(
+          'group hover:border-primary/50 hover:shadow-lg transition-all duration-300',
+          className
+        )}
+      >
+        <CardHeader className="pb-2">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-start gap-3">
+              {index !== undefined && (
+                <motion.span 
+                  className="flex items-center justify-center w-6 h-6 rounded-full bg-gradient-to-br from-primary/10 to-secondary/10 text-primary text-sm font-medium shrink-0"
+                  whileHover={{ scale: 1.2, rotate: 10 }}
+                >
+                  {index + 1}
+                </motion.span>
+              )}
+              <div>
+                <CardTitle className="text-base group-hover:text-primary transition-colors">
+                  {content.title}
+                </CardTitle>
+                <CardDescription className="line-clamp-2 mt-1">
+                  {content.description}
+                </CardDescription>
+              </div>
             </div>
           </div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="flex items-center justify-between mt-2">
-          <div className="flex items-center gap-2 flex-wrap">
-            <Badge variant="primary" className="flex items-center gap-1">
-              {contentTypeIcons[content.content_type]}
-              {contentTypeLabels[content.content_type]}
-            </Badge>
-            <Badge className={getDifficultyColor(content.difficulty)}>
-              {content.difficulty}
-            </Badge>
-            <span className="flex items-center gap-1 text-xs text-muted-foreground">
-              <Clock className="w-3 h-3" />
-              {formatDuration(content.estimated_duration)}
-            </span>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between mt-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              <Badge variant="primary" className="flex items-center gap-1">
+                {contentTypeIcons[content.content_type]}
+                {contentTypeLabels[content.content_type]}
+              </Badge>
+              <Badge className={getDifficultyColor(content.difficulty)}>
+                {content.difficulty}
+              </Badge>
+              <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                <Clock className="w-3 h-3" />
+                {formatDuration(content.estimated_duration)}
+              </span>
+            </div>
+            <Link href={`/learn/${content.id}`}>
+              <Button size="sm" variant="ghost" className="group-hover:bg-primary group-hover:text-white transition-colors">
+                Start
+                <ChevronRight className="w-4 h-4 ml-1" />
+              </Button>
+            </Link>
           </div>
-          <Link href={`/learn/${content.id}`}>
-            <Button size="sm" variant="ghost" className="group-hover:bg-primary group-hover:text-white">
-              Start
-              <ChevronRight className="w-4 h-4 ml-1" />
-            </Button>
-          </Link>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 }
 

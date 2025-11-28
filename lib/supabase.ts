@@ -1,9 +1,15 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key';
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Create a placeholder client that won't make actual requests if not configured
+const isConfigured = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+
+export const supabase: SupabaseClient = createClient(supabaseUrl, supabaseAnonKey);
+
+// Export configuration status
+export const isSupabaseConfigured = isConfigured;
 
 // Server-side client for API routes
 export function createServerClient(accessToken?: string) {

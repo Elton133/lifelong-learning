@@ -7,21 +7,26 @@ interface CardProps extends HTMLAttributes<HTMLDivElement> {
 
 export function Card({ className, variant = 'default', children, ...props }: CardProps) {
   const variants = {
-    default: 'bg-white dark:bg-zinc-900',
-    elevated: 'bg-white dark:bg-zinc-900 shadow-sm',
-    outline: 'bg-transparent border border-border',
+    default: 'bg-white dark:bg-zinc-900 shadow-sm',
+    elevated: 'bg-white dark:bg-zinc-900 shadow-lg hover:shadow-xl transition-shadow duration-300',
+    outline: 'bg-transparent border border-border hover:shadow-md transition-shadow duration-300',
   };
 
   return (
     <div
       className={cn(
-        'rounded-xl p-6',
+        'rounded-2xl p-6 relative overflow-hidden',
         variants[variant],
         className
       )}
       {...props}
     >
-      {children}
+      {/* Decorative corner circles */}
+      <div className="absolute -top-6 -right-6 w-16 h-16 bg-gradient-to-br from-primary/5 to-secondary/5 rounded-full pointer-events-none" />
+      <div className="absolute -bottom-6 -left-6 w-12 h-12 bg-gradient-to-br from-secondary/5 to-primary/5 rounded-full pointer-events-none" />
+      <div className="relative z-10">
+        {children}
+      </div>
     </div>
   );
 }
