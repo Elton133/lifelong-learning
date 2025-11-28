@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "SkillFlow - Corporate Learning Platform",
-  description: "Hyper-personalized corporate learning platform - Spotify + Duolingo + GitHub for professional skill development",
+  title: "Lifelong Learning - Personal Growth Platform",
+  description: "Hyper-personalized learning platform for continuous growth and skill development",
 };
 
 export default function RootLayout({
