@@ -3,7 +3,7 @@
 import { Progress } from '@/components/ui/Progress';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
-import { cn, getMasteryLabel, getMasteryColor, formatRelativeTime } from '@/lib/utils';
+import { cn, getMasteryLabel, getMasteryColor, getMasteryBadgeClass, formatRelativeTime } from '@/lib/utils';
 import type { UserSkill } from '@/types/database';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
@@ -38,7 +38,7 @@ export function SkillCard({ userSkill, className }: SkillCardProps) {
                   {skill.category}
                 </Badge>
               )}
-              <Badge size="sm" className={getMasteryColor(userSkill.mastery_level).replace('bg-', 'bg-opacity-20 text-').replace('-400', '-600')}>
+              <Badge size="sm" className={getMasteryBadgeClass(userSkill.mastery_level)}>
                 {getMasteryLabel(userSkill.mastery_level)}
               </Badge>
             </div>

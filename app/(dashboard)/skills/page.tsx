@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Progress } from '@/components/ui/Progress';
 import { Card, CardContent } from '@/components/ui/Card';
-import { cn, getMasteryLabel, getMasteryColor } from '@/lib/utils';
+import { cn, getMasteryLabel, getMasteryBadgeClass } from '@/lib/utils';
 
 type ViewMode = 'grid' | 'list';
 type FilterCategory = 'all' | 'technical' | 'communication' | 'leadership' | 'domain-specific';
@@ -76,7 +76,7 @@ export default function SkillsPage() {
             <p className="text-sm text-muted-foreground">Average Mastery</p>
             <div className="flex items-center gap-3 mt-1">
               <p className="text-3xl font-bold">{avgMastery}%</p>
-              <Badge className={getMasteryColor(avgMastery).replace('bg-', 'bg-opacity-20 text-').replace('-400', '-600')}>
+              <Badge className={getMasteryBadgeClass(avgMastery)}>
                 {getMasteryLabel(avgMastery)}
               </Badge>
             </div>
@@ -147,7 +147,7 @@ export default function SkillsPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <h3 className="font-medium truncate">{skill.skill?.name}</h3>
-                    <Badge size="sm" className={getMasteryColor(skill.mastery_level).replace('bg-', 'bg-opacity-20 text-').replace('-400', '-600')}>
+                    <Badge size="sm" className={getMasteryBadgeClass(skill.mastery_level)}>
                       {getMasteryLabel(skill.mastery_level)}
                     </Badge>
                   </div>

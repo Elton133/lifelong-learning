@@ -4,7 +4,7 @@ import { useDashboardStats, useSkills } from '@/hooks/useUser';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Progress } from '@/components/ui/Progress';
 import { Badge } from '@/components/ui/Badge';
-import { getMasteryLabel, getMasteryColor } from '@/lib/utils';
+import { getMasteryLabel, getMasteryColor, getMasteryBadgeClass } from '@/lib/utils';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, LineChart, Line } from 'recharts';
 import { TrendingUp, Clock, Target, Award } from 'lucide-react';
 
@@ -203,7 +203,7 @@ export default function ProgressPage() {
                   />
                 </div>
                 <div className="w-20 shrink-0 text-right">
-                  <Badge size="sm" className={getMasteryColor(skill.mastery).replace('bg-', 'bg-opacity-20 text-').replace('-400', '-600')}>
+                  <Badge size="sm" className={getMasteryBadgeClass(skill.mastery)}>
                     {getMasteryLabel(skill.mastery)}
                   </Badge>
                 </div>

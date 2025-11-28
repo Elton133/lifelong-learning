@@ -55,6 +55,14 @@ export function getMasteryColor(level: number): string {
   return 'bg-green-400';
 }
 
+export function getMasteryBadgeClass(level: number): string {
+  if (level < 20) return 'bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400';
+  if (level < 40) return 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400';
+  if (level < 60) return 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400';
+  if (level < 80) return 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400';
+  return 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400';
+}
+
 export function getDifficultyColor(difficulty: string): string {
   switch (difficulty) {
     case 'beginner':

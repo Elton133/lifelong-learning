@@ -178,9 +178,8 @@ export const playlistAPI = {
     // return fetchAPI<Playlist[]>('/playlists/recommended');
   },
 
-  async generate(options?: { goalId?: string }): Promise<ApiResponse<Playlist>> {
-    // Mock implementation
-    void options;
+  async generate(_options?: { goalId?: string }): Promise<ApiResponse<Playlist>> {
+    // Mock implementation - options would be used for goal-based playlist generation
     return { data: mockDailyPlaylist };
     // Real implementation:
     // return fetchAPI<Playlist>('/playlists/generate', { 
@@ -220,9 +219,8 @@ export const insightsAPI = {
     // return fetchAPI<Insight>(`/insights/${id}/mark-read`, { method: 'POST' });
   },
 
-  async dismiss(id: string): Promise<ApiResponse<void>> {
-    // Mock implementation
-    void id;
+  async dismiss(_id: string): Promise<ApiResponse<void>> {
+    // Mock implementation - id would be used to dismiss the insight
     return { data: undefined };
     // Real implementation:
     // return fetchAPI<void>(`/insights/dismiss/${id}`, { method: 'POST' });
