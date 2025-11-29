@@ -67,8 +67,8 @@ export function StatsCards({ stats, className }: StatsCardsProps) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: index * 0.1 }}
         >
-          <Card variant="elevated" className="hover-lift">
-            <CardContent className="flex items-center gap-3">
+          <Card variant="elevated" className="hover-lift h-full">
+            <CardContent className="flex items-center gap-3 h-full">
               {card.showProgress ? (
                 <CircularProgress 
                   value={card.progress || 0} 
@@ -79,16 +79,16 @@ export function StatsCards({ stats, className }: StatsCardsProps) {
                   <card.icon className={cn('w-4 h-4', card.iconColor)} />
                 </CircularProgress>
               ) : (
-                <div className={cn('flex items-center justify-center w-10 h-10 rounded-xl', card.iconBg)}>
+                <div className={cn('flex items-center justify-center w-10 h-10 rounded-xl shrink-0', card.iconBg)}>
                   <card.icon className={cn('w-5 h-5', card.iconColor)} />
                 </div>
               )}
-              <div>
+              <div className="min-h-[4rem] flex flex-col justify-center">
                 <p className="text-sm text-muted-foreground">{card.label}</p>
                 <p className="text-2xl font-bold">{card.value}</p>
-                {card.subValue && (
-                  <p className="text-xs text-muted-foreground">{card.subValue}</p>
-                )}
+                <p className="text-xs text-muted-foreground h-4">
+                  {card.subValue || '\u00A0'}
+                </p>
               </div>
             </CardContent>
           </Card>

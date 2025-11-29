@@ -1,52 +1,94 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
+import { supabaseAdmin } from '../utils/supabase.client';
 
 const router = Router();
 
 // GET /api/sessions
-router.get('/', async (req, res) => {
-  const { limit } = req.query;
-  
-  const sessions = [
-    {
-      id: 'session-1',
-      user_id: 'user-1',
-      content_id: 'content-1',
-      started_at: new Date(Date.now() - 86400000).toISOString(),
-      completed_at: new Date(Date.now() - 86100000).toISOString(),
-      performance_score: 85,
-      time_spent: 300,
-      xp_earned: 30,
-    },
-    {
-      id: 'session-2',
-      user_id: 'user-1',
-      content_id: 'content-2',
-      started_at: new Date(Date.now() - 172800000).toISOString(),
-      completed_at: new Date(Date.now() - 172620000).toISOString(),
-      performance_score: 100,
-      time_spent: 180,
-      xp_earned: 22,
-    },
-  ];
-  
-  const maxSessions = limit ? parseInt(limit as string) : 10;
-  res.json(sessions.slice(0, maxSessions));
+router.get('/', async (req: Request, res: Response) => {
+  try {
+    const { limit } = req.query;
+    const authHeader = req.headers.authorization;
+    
+    if (!supabaseAdmin) {
+      return res.status(503).json({ error: 'Database not configured' });
+    }
+    
+    if (!authHeader?.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+    
+    const token = authHeader.split(' ')[1];
+    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
+    
+    if (authError || !user) {
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+    
+    const maxSessions = limit ? parseInt(limit as string) : 10;
+    
+    const { data: sessions, error } = await supabaseAdmin
+      .from('learning_sessions')
+      .select(`
+        *,
+        content:learning_content(*)
+      `)
+      .eq('user_id', user.id)
+      .order('started_at', { ascending: false })
+      .limit(maxSessions);
+    
+    if (error) {
+      console.error('Error fetching sessions:', error);
+      return res.status(500).json({ error: 'Failed to fetch sessions' });
+    }
+    
+    res.json(sessions || []);
+  } catch (error) {
+    console.error('Error in GET /sessions:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 // GET /api/sessions/:id
-router.get('/:id', async (req, res) => {
-  const { id } = req.params;
-  
-  res.json({
-    id,
-    user_id: 'user-1',
-    content_id: 'content-1',
-    started_at: new Date(Date.now() - 86400000).toISOString(),
-    completed_at: new Date(Date.now() - 86100000).toISOString(),
-    performance_score: 85,
-    time_spent: 300,
-    xp_earned: 30,
-  });
+router.get('/:id', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const authHeader = req.headers.authorization;
+    
+    if (!supabaseAdmin) {
+      return res.status(503).json({ error: 'Database not configured' });
+    }
+    
+    if (!authHeader?.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+    
+    const token = authHeader.split(' ')[1];
+    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
+    
+    if (authError || !user) {
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+    
+    const { data: session, error } = await supabaseAdmin
+      .from('learning_sessions')
+      .select(`
+        *,
+        content:learning_content(*)
+      `)
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .single();
+    
+    if (error) {
+      console.error('Error fetching session:', error);
+      return res.status(404).json({ error: 'Session not found' });
+    }
+    
+    res.json(session);
+  } catch (error) {
+    console.error('Error in GET /sessions/:id:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 export default router;

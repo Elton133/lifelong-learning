@@ -1,81 +1,186 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
+import { supabaseAdmin } from '../utils/supabase.client';
 
 const router = Router();
 
 // GET /api/users/me
-router.get('/me', async (req, res) => {
-  res.json({
-    id: 'user-1',
-    full_name: 'Alex Developer',
-    role: 'Senior Software Engineer',
-    department: 'Engineering',
-    seniority_level: 'senior',
-    learning_style: 'hands-on',
-    career_goals: [
-      { title: 'Become a Tech Lead', target_date: '2025-06-01' },
-    ],
-    streak_count: 7,
-    total_xp: 2450,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  });
+router.get('/me', async (req: Request, res: Response) => {
+  try {
+    // Get the access token from the Authorization header
+    const authHeader = req.headers.authorization;
+    
+    if (!supabaseAdmin) {
+      return res.status(503).json({ error: 'Database not configured' });
+    }
+    
+    // If no auth header, return error
+    if (!authHeader?.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+    
+    const token = authHeader.split(' ')[1];
+    
+    // Verify the token and get user
+    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
+    
+    if (authError || !user) {
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+    
+    // Fetch profile from database
+    const { data: profile, error } = await supabaseAdmin
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single();
+    
+    if (error) {
+      console.error('Error fetching profile:', error);
+      return res.status(500).json({ error: 'Failed to fetch profile' });
+    }
+    
+    res.json(profile);
+  } catch (error) {
+    console.error('Error in /users/me:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 // PATCH /api/users/me
-router.patch('/me', async (req, res) => {
-  const updates = req.body;
-  
-  res.json({
-    id: 'user-1',
-    ...updates,
-    updated_at: new Date().toISOString(),
-  });
+router.patch('/me', async (req: Request, res: Response) => {
+  try {
+    const authHeader = req.headers.authorization;
+    
+    if (!supabaseAdmin) {
+      return res.status(503).json({ error: 'Database not configured' });
+    }
+    
+    if (!authHeader?.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+    
+    const token = authHeader.split(' ')[1];
+    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
+    
+    if (authError || !user) {
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+    
+    const updates = req.body;
+    
+    const { data: profile, error } = await supabaseAdmin
+      .from('profiles')
+      .update({
+        ...updates,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', user.id)
+      .select()
+      .single();
+    
+    if (error) {
+      console.error('Error updating profile:', error);
+      return res.status(500).json({ error: 'Failed to update profile' });
+    }
+    
+    res.json(profile);
+  } catch (error) {
+    console.error('Error in PATCH /users/me:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 // GET /api/users/me/skills
-router.get('/me/skills', async (req, res) => {
-  res.json([
-    {
-      id: 'us-1',
-      user_id: 'user-1',
-      skill_id: 'skill-1',
-      mastery_level: 72,
-      last_practiced: new Date(Date.now() - 86400000).toISOString(),
-      practice_count: 15,
-      growth_velocity: 2.5,
-      skill: {
-        id: 'skill-1',
-        name: 'TypeScript',
-        category: 'technical',
-        description: 'Typed superset of JavaScript',
-      },
-    },
-    {
-      id: 'us-2',
-      user_id: 'user-1',
-      skill_id: 'skill-2',
-      mastery_level: 85,
-      last_practiced: new Date(Date.now() - 172800000).toISOString(),
-      practice_count: 28,
-      growth_velocity: 1.8,
-      skill: {
-        id: 'skill-2',
-        name: 'React',
-        category: 'technical',
-        description: 'JavaScript library for building UIs',
-      },
-    },
-  ]);
+router.get('/me/skills', async (req: Request, res: Response) => {
+  try {
+    const authHeader = req.headers.authorization;
+    
+    if (!supabaseAdmin) {
+      return res.status(503).json({ error: 'Database not configured' });
+    }
+    
+    if (!authHeader?.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+    
+    const token = authHeader.split(' ')[1];
+    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
+    
+    if (authError || !user) {
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+    
+    const { data: skills, error } = await supabaseAdmin
+      .from('user_skills')
+      .select(`
+        *,
+        skill:skills(*)
+      `)
+      .eq('user_id', user.id);
+    
+    if (error) {
+      console.error('Error fetching skills:', error);
+      return res.status(500).json({ error: 'Failed to fetch skills' });
+    }
+    
+    res.json(skills || []);
+  } catch (error) {
+    console.error('Error in /users/me/skills:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 // GET /api/users/me/skill-graph
-router.get('/me/skill-graph', async (req, res) => {
-  res.json({
-    nodes: [
-      { id: 'skill-1', name: 'TypeScript', category: 'technical', mastery_level: 72, connections: ['skill-2', 'skill-3'] },
-      { id: 'skill-2', name: 'React', category: 'technical', mastery_level: 85, connections: ['skill-1', 'skill-4'] },
-    ],
-  });
+router.get('/me/skill-graph', async (req: Request, res: Response) => {
+  try {
+    const authHeader = req.headers.authorization;
+    
+    if (!supabaseAdmin) {
+      return res.status(503).json({ error: 'Database not configured' });
+    }
+    
+    if (!authHeader?.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+    
+    const token = authHeader.split(' ')[1];
+    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
+    
+    if (authError || !user) {
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+    
+    // Get user skills with related skill data
+    const { data: userSkills, error } = await supabaseAdmin
+      .from('user_skills')
+      .select(`
+        mastery_level,
+        skill:skills(id, name, category, related_skills)
+      `)
+      .eq('user_id', user.id);
+    
+    if (error) {
+      console.error('Error fetching skill graph:', error);
+      return res.status(500).json({ error: 'Failed to fetch skill graph' });
+    }
+    
+    // Transform to graph nodes format
+    const nodes = (userSkills || []).map((us) => {
+      const skillData = Array.isArray(us.skill) ? us.skill[0] : us.skill;
+      return {
+        id: skillData?.id || '',
+        name: skillData?.name || '',
+        category: skillData?.category || '',
+        mastery_level: us.mastery_level,
+        connections: skillData?.related_skills || [],
+      };
+    }).filter(node => node.id); // Filter out any empty entries
+    
+    res.json({ nodes });
+  } catch (error) {
+    console.error('Error in /users/me/skill-graph:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 export default router;

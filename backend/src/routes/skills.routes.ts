@@ -1,31 +1,57 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
+import { supabaseAdmin } from '../utils/supabase.client';
 
 const router = Router();
 
 // GET /api/skills
-router.get('/', async (req, res) => {
-  res.json([
-    { id: 'skill-1', name: 'TypeScript', category: 'technical', description: 'Typed superset of JavaScript' },
-    { id: 'skill-2', name: 'React', category: 'technical', description: 'JavaScript library for building UIs' },
-    { id: 'skill-3', name: 'Node.js', category: 'technical', description: 'JavaScript runtime' },
-    { id: 'skill-4', name: 'Next.js', category: 'technical', description: 'React framework' },
-    { id: 'skill-5', name: 'PostgreSQL', category: 'technical', description: 'Relational database' },
-    { id: 'skill-6', name: 'Technical Communication', category: 'communication', description: 'Communicate technical concepts' },
-  ]);
+router.get('/', async (req: Request, res: Response) => {
+  try {
+    if (!supabaseAdmin) {
+      return res.status(503).json({ error: 'Database not configured' });
+    }
+    
+    const { data: skills, error } = await supabaseAdmin
+      .from('skills')
+      .select('*')
+      .order('name');
+    
+    if (error) {
+      console.error('Error fetching skills:', error);
+      return res.status(500).json({ error: 'Failed to fetch skills' });
+    }
+    
+    res.json(skills || []);
+  } catch (error) {
+    console.error('Error in GET /skills:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 // GET /api/skills/:id
-router.get('/:id', async (req, res) => {
-  const { id } = req.params;
-  
-  res.json({
-    id,
-    name: 'TypeScript',
-    category: 'technical',
-    description: 'Typed superset of JavaScript for building robust applications',
-    related_skills: ['skill-2', 'skill-3'],
-    created_at: new Date().toISOString(),
-  });
+router.get('/:id', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    
+    if (!supabaseAdmin) {
+      return res.status(503).json({ error: 'Database not configured' });
+    }
+    
+    const { data: skill, error } = await supabaseAdmin
+      .from('skills')
+      .select('*')
+      .eq('id', id)
+      .single();
+    
+    if (error) {
+      console.error('Error fetching skill:', error);
+      return res.status(404).json({ error: 'Skill not found' });
+    }
+    
+    res.json(skill);
+  } catch (error) {
+    console.error('Error in GET /skills/:id:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 export default router;

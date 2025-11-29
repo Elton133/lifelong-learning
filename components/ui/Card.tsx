@@ -3,9 +3,10 @@ import { HTMLAttributes } from 'react';
 
 interface CardProps extends HTMLAttributes<HTMLDivElement> {
   variant?: 'default' | 'elevated' | 'outline';
+  contentClassName?: string;
 }
 
-export function Card({ className, variant = 'default', children, ...props }: CardProps) {
+export function Card({ className, contentClassName, variant = 'default', children, ...props }: CardProps) {
   const variants = {
     default: 'bg-white dark:bg-zinc-900 shadow-sm',
     elevated: 'bg-white dark:bg-zinc-900 shadow-lg hover:shadow-xl transition-shadow duration-300',
@@ -24,7 +25,7 @@ export function Card({ className, variant = 'default', children, ...props }: Car
       {/* Decorative corner circles */}
       <div className="absolute -top-6 -right-6 w-16 h-16 bg-gradient-to-br from-primary/5 to-secondary/5 rounded-full pointer-events-none" />
       <div className="absolute -bottom-6 -left-6 w-12 h-12 bg-gradient-to-br from-secondary/5 to-primary/5 rounded-full pointer-events-none" />
-      <div className="relative z-10">
+      <div className={cn('relative z-10', contentClassName)}>
         {children}
       </div>
     </div>
