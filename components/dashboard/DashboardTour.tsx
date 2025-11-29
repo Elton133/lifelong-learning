@@ -158,7 +158,7 @@ export function DashboardTour({ onComplete }: DashboardTourProps) {
         className="fixed inset-0 z-[100]"
       >
         {/* Overlay */}
-        <div className="absolute inset-0 bg-black/60" />
+        <div className="absolute inset-0 bg-black/80" />
 
         {/* Spotlight on target */}
         {targetRect && (

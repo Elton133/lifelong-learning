@@ -21,7 +21,7 @@ export function StreakWidget({ count, className }: StreakWidgetProps) {
     >
       <Card 
         className={cn(
-          'flex items-center gap-4 bg-gradient-to-r shadow-lg',
+          'flex flex-row items-center gap-4 bg-gradient-to-r shadow-lg',
           isActive 
             ? 'from-orange-500/10 to-red-500/10 border border-orange-200 dark:border-orange-800' 
             : 'from-gray-100 to-gray-50 dark:from-zinc-800 dark:to-zinc-900',
