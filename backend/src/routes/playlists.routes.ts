@@ -1,13 +1,39 @@
 import { Router, Request, Response } from 'express';
-import { supabaseAdmin } from '../utils/supabase.client';
+import { supabaseAdmin, verifyUserToken } from '../utils/supabase.client';
 
 const router = Router();
 
 // Constants for skill mastery thresholds
 const LOW_MASTERY_THRESHOLD = 50;
 
+/**
+ * Helper to extract and verify user from request
+ */
+async function authenticateRequest(req: Request, res: Response) {
+  if (!supabaseAdmin) {
+    res.status(503).json({ error: 'Database not configured' });
+    return null;
+  }
+  
+  const authHeader = req.headers.authorization;
+  if (!authHeader?.startsWith('Bearer ')) {
+    res.status(401).json({ error: 'Not authenticated' });
+    return null;
+  }
+  
+  const token = authHeader.split(' ')[1];
+  const user = await verifyUserToken(token);
+  
+  if (!user) {
+    res.status(401).json({ error: 'Invalid token' });
+    return null;
+  }
+  
+  return user;
+}
+
 // Helper to generate AI-powered playlist based on user context
-async function generatePersonalizedPlaylist(userId: string, goalId?: string): Promise<string[]> {
+async function generatePersonalizedPlaylist(userId: string, _goalId?: string): Promise<string[]> {
   if (!supabaseAdmin) return [];
   
   try {
@@ -61,28 +87,14 @@ async function generatePersonalizedPlaylist(userId: string, goalId?: string): Pr
 // GET /api/playlists/daily
 router.get('/daily', async (req: Request, res: Response) => {
   try {
-    const authHeader = req.headers.authorization;
-    
-    if (!supabaseAdmin) {
-      return res.status(503).json({ error: 'Database not configured' });
-    }
-    
-    if (!authHeader?.startsWith('Bearer ')) {
-      return res.status(401).json({ error: 'Not authenticated' });
-    }
-    
-    const token = authHeader.split(' ')[1];
-    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
-    
-    if (authError || !user) {
-      return res.status(401).json({ error: 'Invalid token' });
-    }
+    const user = await authenticateRequest(req, res);
+    if (!user) return;
     
     // Get today's playlist
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
-    let { data: playlist, error } = await supabaseAdmin
+    const { data: existingPlaylist, error } = await supabaseAdmin!
       .from('playlists')
       .select('*')
       .eq('user_id', user.id)
@@ -91,11 +103,13 @@ router.get('/daily', async (req: Request, res: Response) => {
       .gte('created_at', today.toISOString())
       .single();
     
+    let playlist = existingPlaylist;
+    
     // If no playlist exists for today, generate one
     if (error || !playlist) {
       const contentIds = await generatePersonalizedPlaylist(user.id);
       
-      const { data: newPlaylist, error: insertError } = await supabaseAdmin
+      const { data: newPlaylist, error: insertError } = await supabaseAdmin!
         .from('playlists')
         .insert({
           user_id: user.id,
@@ -119,7 +133,7 @@ router.get('/daily', async (req: Request, res: Response) => {
     
     // Get content for the playlist
     if (playlist.content_ids && playlist.content_ids.length > 0) {
-      const { data: contents } = await supabaseAdmin
+      const { data: contents } = await supabaseAdmin!
         .from('learning_content')
         .select('*')
         .in('id', playlist.content_ids);
@@ -140,24 +154,10 @@ router.get('/daily', async (req: Request, res: Response) => {
 // GET /api/playlists/recommended
 router.get('/recommended', async (req: Request, res: Response) => {
   try {
-    const authHeader = req.headers.authorization;
+    const user = await authenticateRequest(req, res);
+    if (!user) return;
     
-    if (!supabaseAdmin) {
-      return res.status(503).json({ error: 'Database not configured' });
-    }
-    
-    if (!authHeader?.startsWith('Bearer ')) {
-      return res.status(401).json({ error: 'Not authenticated' });
-    }
-    
-    const token = authHeader.split(' ')[1];
-    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
-    
-    if (authError || !user) {
-      return res.status(401).json({ error: 'Invalid token' });
-    }
-    
-    const { data: playlists, error } = await supabaseAdmin
+    const { data: playlists, error } = await supabaseAdmin!
       .from('playlists')
       .select('*')
       .eq('user_id', user.id)
@@ -181,24 +181,10 @@ router.get('/recommended', async (req: Request, res: Response) => {
 router.get('/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const authHeader = req.headers.authorization;
+    const user = await authenticateRequest(req, res);
+    if (!user) return;
     
-    if (!supabaseAdmin) {
-      return res.status(503).json({ error: 'Database not configured' });
-    }
-    
-    if (!authHeader?.startsWith('Bearer ')) {
-      return res.status(401).json({ error: 'Not authenticated' });
-    }
-    
-    const token = authHeader.split(' ')[1];
-    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
-    
-    if (authError || !user) {
-      return res.status(401).json({ error: 'Invalid token' });
-    }
-    
-    const { data: playlist, error } = await supabaseAdmin
+    const { data: playlist, error } = await supabaseAdmin!
       .from('playlists')
       .select('*')
       .eq('id', id)
@@ -212,7 +198,7 @@ router.get('/:id', async (req: Request, res: Response) => {
     
     // Get content for the playlist
     if (playlist.content_ids && playlist.content_ids.length > 0) {
-      const { data: contents } = await supabaseAdmin
+      const { data: contents } = await supabaseAdmin!
         .from('learning_content')
         .select('*')
         .in('id', playlist.content_ids);
@@ -234,26 +220,12 @@ router.get('/:id', async (req: Request, res: Response) => {
 router.post('/generate', async (req: Request, res: Response) => {
   try {
     const { goalId } = req.body;
-    const authHeader = req.headers.authorization;
-    
-    if (!supabaseAdmin) {
-      return res.status(503).json({ error: 'Database not configured' });
-    }
-    
-    if (!authHeader?.startsWith('Bearer ')) {
-      return res.status(401).json({ error: 'Not authenticated' });
-    }
-    
-    const token = authHeader.split(' ')[1];
-    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
-    
-    if (authError || !user) {
-      return res.status(401).json({ error: 'Invalid token' });
-    }
+    const user = await authenticateRequest(req, res);
+    if (!user) return;
     
     const contentIds = await generatePersonalizedPlaylist(user.id, goalId);
     
-    const { data: playlist, error } = await supabaseAdmin
+    const { data: playlist, error } = await supabaseAdmin!
       .from('playlists')
       .insert({
         user_id: user.id,
@@ -274,7 +246,7 @@ router.post('/generate', async (req: Request, res: Response) => {
     
     // Get content for the playlist
     if (playlist.content_ids && playlist.content_ids.length > 0) {
-      const { data: contents } = await supabaseAdmin
+      const { data: contents } = await supabaseAdmin!
         .from('learning_content')
         .select('*')
         .in('id', playlist.content_ids);

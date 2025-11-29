@@ -1,32 +1,44 @@
 import { Router, Request, Response } from 'express';
-import { supabaseAdmin } from '../utils/supabase.client';
+import { supabaseAdmin, verifyUserToken } from '../utils/supabase.client';
 
 const router = Router();
+
+/**
+ * Helper to extract and verify user from request
+ */
+async function authenticateRequest(req: Request, res: Response) {
+  if (!supabaseAdmin) {
+    res.status(503).json({ error: 'Database not configured' });
+    return null;
+  }
+  
+  const authHeader = req.headers.authorization;
+  if (!authHeader?.startsWith('Bearer ')) {
+    res.status(401).json({ error: 'Not authenticated' });
+    return null;
+  }
+  
+  const token = authHeader.split(' ')[1];
+  const user = await verifyUserToken(token);
+  
+  if (!user) {
+    res.status(401).json({ error: 'Invalid token' });
+    return null;
+  }
+  
+  return user;
+}
 
 // GET /api/sessions
 router.get('/', async (req: Request, res: Response) => {
   try {
     const { limit } = req.query;
-    const authHeader = req.headers.authorization;
-    
-    if (!supabaseAdmin) {
-      return res.status(503).json({ error: 'Database not configured' });
-    }
-    
-    if (!authHeader?.startsWith('Bearer ')) {
-      return res.status(401).json({ error: 'Not authenticated' });
-    }
-    
-    const token = authHeader.split(' ')[1];
-    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
-    
-    if (authError || !user) {
-      return res.status(401).json({ error: 'Invalid token' });
-    }
+    const user = await authenticateRequest(req, res);
+    if (!user) return;
     
     const maxSessions = limit ? parseInt(limit as string) : 10;
     
-    const { data: sessions, error } = await supabaseAdmin
+    const { data: sessions, error } = await supabaseAdmin!
       .from('learning_sessions')
       .select(`
         *,
@@ -52,24 +64,10 @@ router.get('/', async (req: Request, res: Response) => {
 router.get('/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const authHeader = req.headers.authorization;
+    const user = await authenticateRequest(req, res);
+    if (!user) return;
     
-    if (!supabaseAdmin) {
-      return res.status(503).json({ error: 'Database not configured' });
-    }
-    
-    if (!authHeader?.startsWith('Bearer ')) {
-      return res.status(401).json({ error: 'Not authenticated' });
-    }
-    
-    const token = authHeader.split(' ')[1];
-    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
-    
-    if (authError || !user) {
-      return res.status(401).json({ error: 'Invalid token' });
-    }
-    
-    const { data: session, error } = await supabaseAdmin
+    const { data: session, error } = await supabaseAdmin!
       .from('learning_sessions')
       .select(`
         *,
