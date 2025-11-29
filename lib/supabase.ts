@@ -1,27 +1,19 @@
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+/**
+ * Supabase Client Re-exports
+ * 
+ * This file provides backward compatibility by re-exporting from the new
+ * modular structure in lib/supabase/.
+ * 
+ * For new code, import directly from:
+ * - '@/lib/supabase/client' for frontend (browser-safe) operations
+ * - '@/lib/supabase/admin' for backend (server-only) operations
+ * - '@/lib/supabase/server' for server-side with user context
+ * 
+ * @deprecated Import from '@/lib/supabase' or specific modules instead
+ */
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key';
+// Re-export frontend client for backward compatibility
+export { supabase, isSupabaseConfigured } from './supabase/client';
 
-// Create a placeholder client that won't make actual requests if not configured
-const isConfigured = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
-
-export const supabase: SupabaseClient = createClient(supabaseUrl, supabaseAnonKey);
-
-// Export configuration status
-export const isSupabaseConfigured = isConfigured;
-
-// Server-side client for API routes
-export function createServerClient(accessToken?: string) {
-  return createClient(
-    supabaseUrl,
-    supabaseAnonKey,
-    accessToken ? {
-      global: {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      },
-    } : undefined
-  );
-}
+// Re-export server client for backward compatibility
+export { createServerClient } from './supabase/server';

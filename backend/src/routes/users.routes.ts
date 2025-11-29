@@ -1,34 +1,42 @@
 import { Router, Request, Response } from 'express';
-import { supabaseAdmin } from '../utils/supabase.client';
+import { supabaseAdmin, verifyUserToken } from '../utils/supabase.client';
 
 const router = Router();
+
+/**
+ * Helper to extract and verify user from request
+ */
+async function authenticateRequest(req: Request, res: Response) {
+  if (!supabaseAdmin) {
+    res.status(503).json({ error: 'Database not configured' });
+    return null;
+  }
+  
+  const authHeader = req.headers.authorization;
+  if (!authHeader?.startsWith('Bearer ')) {
+    res.status(401).json({ error: 'Not authenticated' });
+    return null;
+  }
+  
+  const token = authHeader.split(' ')[1];
+  const user = await verifyUserToken(token);
+  
+  if (!user) {
+    res.status(401).json({ error: 'Invalid token' });
+    return null;
+  }
+  
+  return user;
+}
 
 // GET /api/users/me
 router.get('/me', async (req: Request, res: Response) => {
   try {
-    // Get the access token from the Authorization header
-    const authHeader = req.headers.authorization;
+    const user = await authenticateRequest(req, res);
+    if (!user) return;
     
-    if (!supabaseAdmin) {
-      return res.status(503).json({ error: 'Database not configured' });
-    }
-    
-    // If no auth header, return error
-    if (!authHeader?.startsWith('Bearer ')) {
-      return res.status(401).json({ error: 'Not authenticated' });
-    }
-    
-    const token = authHeader.split(' ')[1];
-    
-    // Verify the token and get user
-    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
-    
-    if (authError || !user) {
-      return res.status(401).json({ error: 'Invalid token' });
-    }
-    
-    // Fetch profile from database
-    const { data: profile, error } = await supabaseAdmin
+    // Fetch profile from database using admin client
+    const { data: profile, error } = await supabaseAdmin!
       .from('profiles')
       .select('*')
       .eq('id', user.id)
@@ -49,26 +57,13 @@ router.get('/me', async (req: Request, res: Response) => {
 // PATCH /api/users/me
 router.patch('/me', async (req: Request, res: Response) => {
   try {
-    const authHeader = req.headers.authorization;
-    
-    if (!supabaseAdmin) {
-      return res.status(503).json({ error: 'Database not configured' });
-    }
-    
-    if (!authHeader?.startsWith('Bearer ')) {
-      return res.status(401).json({ error: 'Not authenticated' });
-    }
-    
-    const token = authHeader.split(' ')[1];
-    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
-    
-    if (authError || !user) {
-      return res.status(401).json({ error: 'Invalid token' });
-    }
+    const user = await authenticateRequest(req, res);
+    if (!user) return;
     
     const updates = req.body;
     
-    const { data: profile, error } = await supabaseAdmin
+    // Update profile using admin client
+    const { data: profile, error } = await supabaseAdmin!
       .from('profiles')
       .update({
         ...updates,
@@ -93,24 +88,10 @@ router.patch('/me', async (req: Request, res: Response) => {
 // GET /api/users/me/skills
 router.get('/me/skills', async (req: Request, res: Response) => {
   try {
-    const authHeader = req.headers.authorization;
+    const user = await authenticateRequest(req, res);
+    if (!user) return;
     
-    if (!supabaseAdmin) {
-      return res.status(503).json({ error: 'Database not configured' });
-    }
-    
-    if (!authHeader?.startsWith('Bearer ')) {
-      return res.status(401).json({ error: 'Not authenticated' });
-    }
-    
-    const token = authHeader.split(' ')[1];
-    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
-    
-    if (authError || !user) {
-      return res.status(401).json({ error: 'Invalid token' });
-    }
-    
-    const { data: skills, error } = await supabaseAdmin
+    const { data: skills, error } = await supabaseAdmin!
       .from('user_skills')
       .select(`
         *,
@@ -133,25 +114,11 @@ router.get('/me/skills', async (req: Request, res: Response) => {
 // GET /api/users/me/skill-graph
 router.get('/me/skill-graph', async (req: Request, res: Response) => {
   try {
-    const authHeader = req.headers.authorization;
-    
-    if (!supabaseAdmin) {
-      return res.status(503).json({ error: 'Database not configured' });
-    }
-    
-    if (!authHeader?.startsWith('Bearer ')) {
-      return res.status(401).json({ error: 'Not authenticated' });
-    }
-    
-    const token = authHeader.split(' ')[1];
-    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
-    
-    if (authError || !user) {
-      return res.status(401).json({ error: 'Invalid token' });
-    }
+    const user = await authenticateRequest(req, res);
+    if (!user) return;
     
     // Get user skills with related skill data
-    const { data: userSkills, error } = await supabaseAdmin
+    const { data: userSkills, error } = await supabaseAdmin!
       .from('user_skills')
       .select(`
         mastery_level,

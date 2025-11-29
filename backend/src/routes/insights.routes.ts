@@ -1,11 +1,37 @@
 import { Router, Request, Response } from 'express';
-import { supabaseAdmin } from '../utils/supabase.client';
+import { supabaseAdmin, verifyUserToken } from '../utils/supabase.client';
 
 const router = Router();
 
 // Constants for mastery level thresholds
 const LOW_SKILL_MASTERY_THRESHOLD = 40;
 const HIGH_SKILL_MASTERY_THRESHOLD = 70;
+
+/**
+ * Helper to extract and verify user from request
+ */
+async function authenticateRequest(req: Request, res: Response) {
+  if (!supabaseAdmin) {
+    res.status(503).json({ error: 'Database not configured' });
+    return null;
+  }
+  
+  const authHeader = req.headers.authorization;
+  if (!authHeader?.startsWith('Bearer ')) {
+    res.status(401).json({ error: 'Not authenticated' });
+    return null;
+  }
+  
+  const token = authHeader.split(' ')[1];
+  const user = await verifyUserToken(token);
+  
+  if (!user) {
+    res.status(401).json({ error: 'Invalid token' });
+    return null;
+  }
+  
+  return user;
+}
 
 // Helper to generate AI-powered insights based on user context
 async function generateAIInsights(userId: string): Promise<void> {
@@ -109,28 +135,14 @@ async function generateAIInsights(userId: string): Promise<void> {
 // GET /api/insights
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const authHeader = req.headers.authorization;
-    
-    if (!supabaseAdmin) {
-      return res.status(503).json({ error: 'Database not configured' });
-    }
-    
-    if (!authHeader?.startsWith('Bearer ')) {
-      return res.status(401).json({ error: 'Not authenticated' });
-    }
-    
-    const token = authHeader.split(' ')[1];
-    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
-    
-    if (authError || !user) {
-      return res.status(401).json({ error: 'Invalid token' });
-    }
+    const user = await authenticateRequest(req, res);
+    if (!user) return;
     
     // Generate fresh AI insights
     await generateAIInsights(user.id);
     
     // Fetch all insights for the user
-    const { data: insights, error } = await supabaseAdmin
+    const { data: insights, error } = await supabaseAdmin!
       .from('insights')
       .select(`
         *,
@@ -156,24 +168,10 @@ router.get('/', async (req: Request, res: Response) => {
 router.post('/:id/mark-read', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const authHeader = req.headers.authorization;
+    const user = await authenticateRequest(req, res);
+    if (!user) return;
     
-    if (!supabaseAdmin) {
-      return res.status(503).json({ error: 'Database not configured' });
-    }
-    
-    if (!authHeader?.startsWith('Bearer ')) {
-      return res.status(401).json({ error: 'Not authenticated' });
-    }
-    
-    const token = authHeader.split(' ')[1];
-    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
-    
-    if (authError || !user) {
-      return res.status(401).json({ error: 'Invalid token' });
-    }
-    
-    const { data: insight, error } = await supabaseAdmin
+    const { data: insight, error } = await supabaseAdmin!
       .from('insights')
       .update({ is_read: true })
       .eq('id', id)
@@ -197,24 +195,10 @@ router.post('/:id/mark-read', async (req: Request, res: Response) => {
 router.post('/dismiss/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const authHeader = req.headers.authorization;
+    const user = await authenticateRequest(req, res);
+    if (!user) return;
     
-    if (!supabaseAdmin) {
-      return res.status(503).json({ error: 'Database not configured' });
-    }
-    
-    if (!authHeader?.startsWith('Bearer ')) {
-      return res.status(401).json({ error: 'Not authenticated' });
-    }
-    
-    const token = authHeader.split(' ')[1];
-    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
-    
-    if (authError || !user) {
-      return res.status(401).json({ error: 'Invalid token' });
-    }
-    
-    const { error } = await supabaseAdmin
+    const { error } = await supabaseAdmin!
       .from('insights')
       .delete()
       .eq('id', id)
