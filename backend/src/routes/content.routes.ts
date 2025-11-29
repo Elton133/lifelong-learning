@@ -148,12 +148,12 @@ router.post('/:id/complete', async (req: Request, res: Response) => {
     if (!user) return;
     
     // Validate input
-    if (typeof performance_score !== 'number' || performance_score < 0 || performance_score > 100) {
+    if (typeof performance_score !== 'number' || !Number.isFinite(performance_score) || performance_score < 0 || performance_score > 100) {
       return res.status(400).json({ error: 'Invalid performance_score (must be 0-100)' });
     }
     
-    if (typeof time_spent !== 'number' || time_spent < 0) {
-      return res.status(400).json({ error: 'Invalid time_spent (must be positive number)' });
+    if (typeof time_spent !== 'number' || !Number.isFinite(time_spent) || time_spent < 0) {
+      return res.status(400).json({ error: 'Invalid time_spent (must be a finite positive number)' });
     }
     
     // Get content for XP calculation (using admin client)

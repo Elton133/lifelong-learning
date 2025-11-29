@@ -35,9 +35,18 @@ const isConfigured = Boolean(supabaseUrl && supabaseAnonKey);
 
 // Validate configuration and provide helpful error messages
 if (!isConfigured && typeof window !== 'undefined') {
-  console.warn(
-    '[Supabase Client] Missing configuration. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your environment.'
-  );
+  // In production, throw an error; in development, warn
+  if (process.env.NODE_ENV === 'production') {
+    console.error(
+      '[Supabase Client] CRITICAL: Missing configuration in production. ' +
+      'Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your environment.'
+    );
+  } else {
+    console.warn(
+      '[Supabase Client] Missing configuration. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your environment. ' +
+      'The app will run with a placeholder client that won\'t make actual requests.'
+    );
+  }
 }
 
 /**
@@ -45,6 +54,10 @@ if (!isConfigured && typeof window !== 'undefined') {
  * 
  * WARNING: This client uses the anon key and respects RLS policies.
  * Never use admin operations with this client.
+ * 
+ * Note: If environment variables are not configured, a placeholder client is created.
+ * This allows the app to run in development mode, but operations will fail.
+ * In production, you MUST configure the environment variables.
  */
 export const supabase: SupabaseClient = createClient(
   supabaseUrl || 'https://placeholder.supabase.co',
