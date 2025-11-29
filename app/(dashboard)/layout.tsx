@@ -9,6 +9,9 @@ import { SWRProvider } from "@/lib/swr-provider"
 import { useUser, useDashboardStats } from "@/hooks/useUser"
 import type React from "react"
 
+// Constants for the leveling system
+const XP_PER_LEVEL = 200; // Amount of XP required to gain one level
+
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
   { name: "Skills", href: "/skills", icon: Target },
@@ -23,8 +26,8 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
   const { profile } = useUser()
   const { stats } = useDashboardStats()
   
-  // Calculate level based on XP (every 200 XP = 1 level)
-  const level = Math.floor((stats?.total_xp || 0) / 200) + 1
+  // Calculate level based on XP
+  const level = Math.floor((stats?.total_xp || 0) / XP_PER_LEVEL) + 1
   
   // Get user initials
   const getInitials = (name: string | null | undefined) => {

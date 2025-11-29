@@ -3,6 +3,10 @@ import { supabaseAdmin } from '../utils/supabase.client';
 
 const router = Router();
 
+// Constants for mastery level thresholds
+const LOW_SKILL_MASTERY_THRESHOLD = 40;
+const HIGH_SKILL_MASTERY_THRESHOLD = 70;
+
 // Helper to generate AI-powered insights based on user context
 async function generateAIInsights(userId: string): Promise<void> {
   if (!supabaseAdmin) return;
@@ -50,8 +54,8 @@ async function generateAIInsights(userId: string): Promise<void> {
     
     // Skill-based suggestions
     if (userSkills && userSkills.length > 0) {
-      const lowMasterySkills = userSkills.filter((s: { mastery_level: number }) => s.mastery_level < 40);
-      const highMasterySkills = userSkills.filter((s: { mastery_level: number }) => s.mastery_level >= 70);
+      const lowMasterySkills = userSkills.filter((s: { mastery_level: number }) => s.mastery_level < LOW_SKILL_MASTERY_THRESHOLD);
+      const highMasterySkills = userSkills.filter((s: { mastery_level: number }) => s.mastery_level >= HIGH_SKILL_MASTERY_THRESHOLD);
       
       if (lowMasterySkills.length > 0) {
         const skillEntry = lowMasterySkills[0];

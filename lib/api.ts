@@ -11,10 +11,10 @@ import type {
   ApiResponse,
 } from '@/types/database';
 
-// API client for frontend - uses Supabase directly for real-time data
+// Backend API URL - used for server-side operations when needed
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
-// Create axios instance with default config
+// Axios client for backend API calls (used for operations that require server processing)
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -22,7 +22,7 @@ export const apiClient = axios.create({
   },
 });
 
-// Helper function for API calls using axios
+// Helper function for backend API calls using axios
 async function fetchAPI<T>(endpoint: string, options?: AxiosRequestConfig): Promise<ApiResponse<T>> {
   try {
     const response = await apiClient.request<T>({
@@ -38,11 +38,15 @@ async function fetchAPI<T>(endpoint: string, options?: AxiosRequestConfig): Prom
   }
 }
 
-// SWR fetcher using axios
+// SWR fetcher using axios for backend API calls
 const swrFetcher = async <T>(url: string): Promise<T> => {
   const response = await apiClient.get<T>(url);
   return response.data;
 };
+
+// ============================================================================
+// Frontend APIs - Use Supabase directly for real-time user data
+// ============================================================================
 
 // User API - Uses Supabase for real-time user data
 export const userAPI = {

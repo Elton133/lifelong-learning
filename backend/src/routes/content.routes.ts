@@ -3,6 +3,9 @@ import { supabaseAdmin } from '../utils/supabase.client';
 
 const router = Router();
 
+// Constants for skill progression
+const MAX_MASTERY_INCREASE_PER_SESSION = 5; // Maximum mastery points gained per completed session
+
 // GET /api/content
 router.get('/', async (req: Request, res: Response) => {
   try {
@@ -179,8 +182,8 @@ router.post('/:id/complete', async (req: Request, res: Response) => {
     // Update skill mastery if content has associated skills
     if (content?.skill_ids && content.skill_ids.length > 0) {
       for (const skillId of content.skill_ids) {
-        // Increment mastery level slightly based on performance
-        const masteryIncrease = Math.round((performance_score / 100) * 5);
+        // Increment mastery level based on performance (scales from 0 to MAX_MASTERY_INCREASE_PER_SESSION)
+        const masteryIncrease = Math.round((performance_score / 100) * MAX_MASTERY_INCREASE_PER_SESSION);
         
         // Check if user has this skill tracked
         const { data: existingSkill } = await supabaseAdmin

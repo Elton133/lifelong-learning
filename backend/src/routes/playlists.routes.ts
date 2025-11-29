@@ -3,6 +3,9 @@ import { supabaseAdmin } from '../utils/supabase.client';
 
 const router = Router();
 
+// Constants for skill mastery thresholds
+const LOW_MASTERY_THRESHOLD = 50;
+
 // Helper to generate AI-powered playlist based on user context
 async function generatePersonalizedPlaylist(userId: string, goalId?: string): Promise<string[]> {
   if (!supabaseAdmin) return [];
@@ -25,9 +28,9 @@ async function generatePersonalizedPlaylist(userId: string, goalId?: string): Pr
     // Build intelligent content query based on user context
     let query = supabaseAdmin.from('learning_content').select('id, skill_ids, difficulty, content_type, estimated_duration');
     
-    // Prioritize content for skills with lower mastery
+    // Prioritize content for skills with lower mastery (below threshold)
     const lowMasterySkillIds = userSkills
-      ?.filter(s => s.mastery_level < 50)
+      ?.filter(s => s.mastery_level < LOW_MASTERY_THRESHOLD)
       .map(s => s.skill_id) || [];
     
     if (lowMasterySkillIds.length > 0) {

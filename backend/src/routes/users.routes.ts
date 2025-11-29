@@ -3,17 +3,6 @@ import { supabaseAdmin } from '../utils/supabase.client';
 
 const router = Router();
 
-// Helper to get user ID from auth header (in production, use proper JWT verification)
-const getUserIdFromRequest = (req: Request): string | null => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader?.startsWith('Bearer ')) {
-    return null;
-  }
-  // In production, verify and decode the JWT to get user ID
-  // For now, we'll use a placeholder or extract from token
-  return null;
-};
-
 // GET /api/users/me
 router.get('/me', async (req: Request, res: Response) => {
   try {
