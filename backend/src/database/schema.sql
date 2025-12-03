@@ -173,8 +173,13 @@ CREATE POLICY "Learning content is viewable by authenticated users" ON learning_
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger AS $$
 BEGIN
-  INSERT INTO public.profiles (id, full_name)
-  VALUES (new.id, new.raw_user_meta_data->>'full_name');
+  INSERT INTO public.profiles (id, full_name, role, department)
+  VALUES (
+    new.id, 
+    new.raw_user_meta_data->>'full_name',
+    new.raw_user_meta_data->>'role',
+    new.raw_user_meta_data->>'department'
+  );
   RETURN new;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
