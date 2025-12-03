@@ -35,7 +35,7 @@ async function authenticateRequest(req: Request, res: Response) {
 // GET /api/content
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const { skill, difficulty, type } = req.query;
+    const { skill, difficulty, type, category } = req.query;
     
     if (!supabaseAdmin) {
       return res.status(503).json({ error: 'Database not configured' });
@@ -51,6 +51,9 @@ router.get('/', async (req: Request, res: Response) => {
     }
     if (type) {
       query = query.eq('content_type', type);
+    }
+    if (category) {
+      query = query.eq('category', category);
     }
     
     const { data: content, error } = await query.order('created_at', { ascending: false });

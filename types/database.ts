@@ -6,8 +6,9 @@ export interface Profile {
   role: string | null;
   department: string | null;
   seniority_level: 'junior' | 'mid' | 'senior' | 'lead' | 'manager' | null;
-  learning_style: 'visual' | 'hands-on' | 'reading' | 'video' | null;
+  learning_style: 'visual' | 'hands-on' | 'reading' | 'video' | 'audio' | null;
   career_goals: CareerGoal[] | null;
+  interests: string[] | null;
   streak_count: number;
   total_xp: number;
   created_at: string;
@@ -51,6 +52,7 @@ export interface LearningContent {
   difficulty: 'beginner' | 'intermediate' | 'advanced';
   estimated_duration: number; // in minutes
   skill_ids: string[];
+  category: string | null;
   content_data: ContentData;
   prerequisites: string[] | null;
   xp_reward: number;

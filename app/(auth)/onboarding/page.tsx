@@ -130,22 +130,52 @@ export default function OnboardingPage() {
   const handleComplete = async () => {
     setIsSubmitting(true);
     
-    // Save onboarding data to localStorage for tour trigger
-    localStorage.setItem('onboardingComplete', 'true');
-    localStorage.setItem('showTour', 'true');
-    localStorage.setItem('userPreferences', JSON.stringify({
-      interests: selectedInterests,
-      goals: selectedGoals,
-      learningStyle: selectedStyle,
-      dailyTime: selectedTime,
-    }));
+    try {
+      // Save onboarding data to database
+      const { supabase } = await import('@/lib/supabase/client');
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        // Convert selectedGoals array to career_goals format
+        const careerGoals = selectedGoals.map(goalId => {
+          const goal = LEARNING_GOALS.find(g => g.id === goalId);
+          return {
+            title: goal?.name || goalId,
+          };
+        });
 
-    // In production, this would save to Supabase
-    // await supabase.from('profiles').update({ ... })
+        // Update profile with onboarding data
+        const { error } = await supabase
+          .from('profiles')
+          .update({
+            interests: selectedInterests,
+            career_goals: careerGoals,
+            learning_style: selectedStyle as 'visual' | 'hands-on' | 'reading' | 'audio' | 'video',
+          })
+          .eq('id', user.id);
 
-    setTimeout(() => {
-      router.push('/');
-    }, 1000);
+        if (error) {
+          console.error('Error saving onboarding data:', error);
+        }
+      }
+
+      // Save onboarding data to localStorage for tour trigger and preferences
+      localStorage.setItem('onboardingComplete', 'true');
+      localStorage.setItem('showTour', 'true');
+      localStorage.setItem('userPreferences', JSON.stringify({
+        interests: selectedInterests,
+        goals: selectedGoals,
+        learningStyle: selectedStyle,
+        dailyTime: selectedTime,
+      }));
+
+      setTimeout(() => {
+        router.push('/');
+      }, 1000);
+    } catch (error) {
+      console.error('Error completing onboarding:', error);
+      setIsSubmitting(false);
+    }
   };
 
   const stepVariants = {
