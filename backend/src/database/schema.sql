@@ -200,3 +200,16 @@ CREATE TRIGGER update_profiles_updated_at
 CREATE TRIGGER update_user_skills_updated_at
   BEFORE UPDATE ON user_skills
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- Function to increment user XP
+-- This function safely increments the total_xp for a user
+-- Used when completing learning sessions
+CREATE OR REPLACE FUNCTION public.increment_user_xp(user_id UUID, xp_amount INTEGER)
+RETURNS void AS $$
+BEGIN
+  UPDATE public.profiles
+  SET total_xp = COALESCE(total_xp, 0) + xp_amount,
+      updated_at = NOW()
+  WHERE id = user_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
