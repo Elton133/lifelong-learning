@@ -141,8 +141,6 @@ export default function OnboardingPage() {
           const goal = LEARNING_GOALS.find(g => g.id === goalId);
           return {
             title: goal?.name || goalId,
-            target_date: undefined,
-            skill_ids: undefined,
           };
         });
 
@@ -152,7 +150,7 @@ export default function OnboardingPage() {
           .update({
             interests: selectedInterests,
             career_goals: careerGoals,
-            learning_style: selectedStyle as 'visual' | 'hands-on' | 'reading' | 'audio',
+            learning_style: selectedStyle as 'visual' | 'hands-on' | 'reading' | 'audio' | 'video',
           })
           .eq('id', user.id);
 
