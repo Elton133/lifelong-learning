@@ -285,30 +285,100 @@ export const contentAPI = {
       
       const xpEarned = Math.round((content?.xp_reward || 10) * (1 + sessionData.performance_score / 200));
       
-      // Update session
-      const { data: session, error } = await supabase
-        .from('learning_sessions')
-        .update({
-          completed_at: new Date().toISOString(),
-          performance_score: sessionData.performance_score,
-          time_spent: sessionData.time_spent,
-          xp_earned: xpEarned,
-        })
-        .eq('content_id', contentId)
-        .eq('user_id', user.id)
-        .is('completed_at', null)
-        .select()
-        .single();
-      
-      if (error) throw error;
-      
+      // Update session. If the caller provided a `sessionId`, prefer it to avoid
+      // ambiguity; otherwise match by content + user + open session.
+      let updateQuery = supabase.from('learning_sessions').update({
+        completed_at: new Date().toISOString(),
+        performance_score: sessionData.performance_score,
+        time_spent: sessionData.time_spent,
+        xp_earned: xpEarned,
+      })
+      .eq('user_id', user.id)
+      .is('completed_at', null);
+
+      if (sessionData.sessionId) {
+        updateQuery = updateQuery.eq('id', sessionData.sessionId);
+      } else {
+        updateQuery = updateQuery.eq('content_id', contentId);
+      }
+
+      // Use maybeSingle() to avoid PostgREST error when 0 rows are returned.
+      const updateResult = await updateQuery.select().maybeSingle();
+      const sessionDataRow = updateResult.data as LearningSession | null;
+      const updateError = updateResult.error;
+
+      if (updateError) {
+        // When PostgREST can't coerce to a single object it will return PGRST116.
+        // Log and surface the error so telemetry/debugging can capture it.
+        console.error('Supabase update error completing session:', updateError);
+        throw updateError;
+      }
+
+      let finalSession: LearningSession | null = sessionDataRow || null;
+
+      if (!finalSession) {
+        // No active session found to update (already completed or never started).
+        // Create a completed session record so new users who finish content
+        // without an explicit start still get a session and XP.
+        const now = new Date();
+        const startedAt = new Date(now.getTime() - (sessionData.time_spent || 0) * 1000).toISOString();
+        const completedAt = now.toISOString();
+
+        const { data: inserted, error: insertError } = await supabase
+          .from('learning_sessions')
+          .insert({
+            user_id: user.id,
+            content_id: contentId,
+            started_at: startedAt,
+            completed_at: completedAt,
+            performance_score: sessionData.performance_score,
+            time_spent: sessionData.time_spent,
+            xp_earned: xpEarned,
+          })
+          .select()
+          .single();
+
+        if (insertError) {
+          console.error('Error inserting new completed session:', insertError);
+          throw insertError;
+        }
+
+        finalSession = inserted as LearningSession;
+      }
+
       // Update user's total XP
-      await supabase.rpc('increment_user_xp', { user_id: user.id, xp_amount: xpEarned });
-      
-      return { data: session as LearningSession };
+      const rpcResult = await supabase.rpc('increment_user_xp', { user_id: user.id, xp_amount: xpEarned });
+      if (rpcResult?.error) {
+        console.error('Error incrementing user xp:', rpcResult.error);
+        return { error: rpcResult.error.message || 'Failed to increment user xp' };
+      }
+
+      return { data: finalSession as LearningSession };
     } catch (error) {
-      console.error('Error completing session:', error);
-      return { error: 'Failed to complete session' };
+      // Improved error logging: capture message, stack and any non-enumerable properties
+      try {
+        if (error instanceof Error) {
+          console.error('Error completing session:', error.message, error.stack);
+          return { error: error.message || 'Failed to complete session' };
+        }
+
+        if (typeof error === 'object' && error !== null) {
+          // include non-enumerable and custom props
+          const serial = JSON.stringify(error, Object.getOwnPropertyNames(error));
+          console.error('Error completing session (object):', serial);
+          const errObj = error as Record<string, unknown>;
+          const maybeMessage = typeof errObj['message'] === 'string' ? (errObj['message'] as string) : undefined;
+          const maybeError = typeof errObj['error'] === 'string' ? (errObj['error'] as string) : undefined;
+          const msg = maybeMessage || maybeError || serial;
+          return { error: msg || 'Failed to complete session' };
+        }
+
+        console.error('Error completing session (unknown):', error);
+        return { error: 'Failed to complete session' };
+      } catch (logErr) {
+        console.error('Error while logging original error:', logErr);
+        return { error: 'Failed to complete session' };
+      }
     }
   },
 };

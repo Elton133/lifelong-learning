@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Progress } from '@/components/ui/Progress';
 import { formatDuration, getDifficultyColor } from '@/lib/utils';
 import type { QuizQuestion } from '@/types/database';
+import VideoPlayer from '@/components/ui/VideoPlayer';
 
 function LoadingSkeleton() {
   return (
@@ -135,20 +136,20 @@ function QuizPlayer({
 }
 
 // Video Player Component
-function VideoPlayer({ url }: { url: string }) {
-  return (
-    <Card>
-      <CardContent className="pt-6">
-        <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
-          <div className="text-center">
-            <p className="text-muted-foreground">Video Player Placeholder</p>
-            <p className="text-sm text-muted-foreground mt-1">{url}</p>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
+// function VideoPlayer({ url }: { url: string }) {
+//   return (
+//     <Card>
+//       <CardContent className="pt-6">
+//         <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
+//           <div className="text-center">
+//             <p className="text-muted-foreground">Video Player Placeholder</p>
+//             <p className="text-sm text-muted-foreground mt-1">{url}</p>
+//           </div>
+//         </div>
+//       </CardContent>
+//     </Card>
+//   );
+// }
 
 // Completion Screen
 function CompletionScreen({ 

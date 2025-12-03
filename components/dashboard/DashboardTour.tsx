@@ -24,7 +24,7 @@ const TOUR_STEPS: TourStep[] = [
     target: '[data-tour="streak"]',
     title: 'Keep Your Streak Going! 🔥',
     description: 'Your streak shows how many consecutive days you\'ve been learning. Build habits and earn rewards!',
-    position: 'bottom',
+    position: 'left',
   },
   {
     target: '[data-tour="stats"]',
@@ -158,7 +158,7 @@ export function DashboardTour({ onComplete }: DashboardTourProps) {
         className="fixed inset-0 z-[100]"
       >
         {/* Overlay */}
-        <div className="absolute inset-0 bg-black/80" />
+        <div className="absolute inset-0 bg-black/20" />
 
         {/* Spotlight on target */}
         {targetRect && (
