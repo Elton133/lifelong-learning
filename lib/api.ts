@@ -307,9 +307,10 @@ export const contentAPI = {
       const sessionDataRow = updateResult.data as LearningSession | null;
       const updateError = updateResult.error;
 
-      if (updateError) {
-        // When PostgREST can't coerce to a single object it will return PGRST116.
-        // Log and surface the error so telemetry/debugging can capture it.
+      // Check for real errors (not just "no rows found")
+      // PGRST116 is "no rows returned" which shouldn't happen with maybeSingle(),
+      // but we handle it gracefully just in case
+      if (updateError && updateError.code !== 'PGRST116') {
         console.error('Supabase update error completing session:', updateError);
         throw updateError;
       }
