@@ -308,8 +308,9 @@ export const contentAPI = {
       const updateError = updateResult.error;
 
       // Check for real errors (not just "no rows found")
-      // PGRST116 is "no rows returned" which shouldn't happen with maybeSingle(),
-      // but we handle it gracefully just in case
+      // PGRST116 ("no rows returned") can occur when UPDATE affects 0 rows,
+      // which is expected when no active session exists to update.
+      // We handle this gracefully by proceeding to create a new session.
       if (updateError && updateError.code !== 'PGRST116') {
         console.error('Supabase update error completing session:', updateError);
         throw updateError;
