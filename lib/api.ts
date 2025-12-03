@@ -201,6 +201,7 @@ export const contentAPI = {
     skill?: string;
     difficulty?: string;
     type?: string;
+    category?: string;
   }): Promise<ApiResponse<LearningContent[]>> {
     try {
       let query = supabase.from('learning_content').select('*');
@@ -210,6 +211,9 @@ export const contentAPI = {
       }
       if (filters?.type) {
         query = query.eq('content_type', filters.type);
+      }
+      if (filters?.category) {
+        query = query.eq('category', filters.category);
       }
       // Skill filtering would need array contains operation
       if (filters?.skill) {
@@ -467,7 +471,7 @@ export const playlistAPI = {
       // Get user profile for personalization
       const { data: profile } = await supabase
         .from('profiles')
-        .select('learning_style, career_goals')
+        .select('learning_style, career_goals, interests')
         .eq('id', user.id)
         .single();
       
@@ -486,6 +490,12 @@ export const playlistAPI = {
       
       // Build intelligent content query based on user context
       let query = supabase.from('learning_content').select('*');
+      
+      // Filter by user interests (categories) - prioritize content matching user's interests
+      const userInterests = profile?.interests || prefs?.interests || [];
+      if (userInterests.length > 0) {
+        query = query.in('category', userInterests);
+      }
       
       // Prioritize content for skills with lower mastery
       const lowMasterySkillIds = userSkills

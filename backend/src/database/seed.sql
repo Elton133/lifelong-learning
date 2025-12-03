@@ -24,7 +24,7 @@ UPDATE skills SET related_skills = ARRAY['66666666-6666-6666-6666-666666666666':
 UPDATE skills SET related_skills = ARRAY['55555555-5555-5555-5555-555555555555'::uuid, '33333333-3333-3333-3333-333333333333'::uuid] WHERE id = '88888888-8888-8888-8888-888888888888';
 
 -- Insert sample learning content
-INSERT INTO learning_content (id, title, description, content_type, difficulty, estimated_duration, skill_ids, content_data, xp_reward) VALUES
+INSERT INTO learning_content (id, title, description, content_type, difficulty, estimated_duration, skill_ids, category, content_data, xp_reward) VALUES
   (
     'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
     'TypeScript Generics Deep Dive',
@@ -33,6 +33,7 @@ INSERT INTO learning_content (id, title, description, content_type, difficulty, 
     'intermediate',
     5,
     ARRAY['11111111-1111-1111-1111-111111111111'::uuid],
+    'programming',
     '{"video_url": "https://example.com/video1"}',
     25
   ),
@@ -44,6 +45,7 @@ INSERT INTO learning_content (id, title, description, content_type, difficulty, 
     'beginner',
     3,
     ARRAY['22222222-2222-2222-2222-222222222222'::uuid],
+    'programming',
     '{
       "quiz_questions": [
         {
@@ -72,6 +74,7 @@ INSERT INTO learning_content (id, title, description, content_type, difficulty, 
     'intermediate',
     8,
     ARRAY['33333333-3333-3333-3333-333333333333'::uuid],
+    'technology',
     '{"interactive_elements": [{"type": "fill-blank", "data": {"prompt": "Complete the route handler"}}]}',
     40
   ),
@@ -83,6 +86,7 @@ INSERT INTO learning_content (id, title, description, content_type, difficulty, 
     'advanced',
     10,
     ARRAY['44444444-4444-4444-4444-444444444444'::uuid, '22222222-2222-2222-2222-222222222222'::uuid],
+    'programming',
     '{
       "scenario_steps": [
         {
@@ -105,6 +109,7 @@ INSERT INTO learning_content (id, title, description, content_type, difficulty, 
     'advanced',
     12,
     ARRAY['55555555-5555-5555-5555-555555555555'::uuid],
+    'technology',
     '{
       "sandbox_config": {
         "language": "sql",
@@ -123,6 +128,7 @@ INSERT INTO learning_content (id, title, description, content_type, difficulty, 
     'beginner',
     4,
     ARRAY['66666666-6666-6666-6666-666666666666'::uuid, '77777777-7777-7777-7777-777777777777'::uuid],
+    'leadership',
     '{"video_url": "https://example.com/video2"}',
     20
   );

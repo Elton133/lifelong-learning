@@ -11,8 +11,9 @@ CREATE TABLE IF NOT EXISTS profiles (
   role TEXT,
   department TEXT,
   seniority_level TEXT CHECK (seniority_level IN ('junior', 'mid', 'senior', 'lead', 'manager')),
-  learning_style TEXT CHECK (learning_style IN ('visual', 'hands-on', 'reading', 'video')),
+  learning_style TEXT CHECK (learning_style IN ('visual', 'hands-on', 'reading', 'video', 'audio')),
   career_goals JSONB DEFAULT '[]'::jsonb,
+  interests TEXT[] DEFAULT '{}',
   streak_count INTEGER DEFAULT 0,
   total_xp INTEGER DEFAULT 0,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -52,6 +53,7 @@ CREATE TABLE IF NOT EXISTS learning_content (
   difficulty TEXT CHECK (difficulty IN ('beginner', 'intermediate', 'advanced')),
   estimated_duration INTEGER, -- in minutes
   skill_ids UUID[] DEFAULT '{}',
+  category TEXT, -- Category for filtering (e.g., 'technology', 'photography', 'finance', 'programming')
   content_data JSONB DEFAULT '{}'::jsonb,
   prerequisites UUID[] DEFAULT '{}',
   xp_reward INTEGER DEFAULT 10,
