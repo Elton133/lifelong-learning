@@ -500,18 +500,25 @@ const response = await makeAuthenticatedRequest('/api/content/123/complete', {
 
 ### 406 Not Acceptable Error
 
-**Cause**: Usually happens when RLS policies block the operation.
+**Cause**: Usually happens when trying to update a record that doesn't exist, or when RLS policies block the operation.
 
 **Solution**: 
-1. Check if the operation should use the admin client (bypasses RLS)
-2. Verify your RLS policies allow the operation for the authenticated user
-3. Ensure the `Authorization` header is being sent correctly
+1. Ensure the `increment_user_xp` database function exists (see schema.sql)
+2. Check if the operation should use the admin client (bypasses RLS)
+3. Verify your RLS policies allow the operation for the authenticated user
+4. Ensure the `Authorization` header is being sent correctly
+5. For session completion, the frontend code automatically handles missing sessions by creating new completed sessions
 
 ### Session Not Updating
 
-**Cause**: RLS policies may block updates on `learning_sessions` table.
+**Cause**: When a user completes content without an explicit session start, or RLS policies block updates on `learning_sessions` table.
 
-**Solution**: Use the admin client for session updates in the backend:
+**Solution**: The frontend `completeSession` function now automatically handles this case:
+- First tries to update an existing open session
+- If no session exists, creates a new completed session record
+- This allows users to complete content even if they didn't explicitly start a session
+
+For backend operations, use the admin client for session updates:
 
 ```typescript
 // ❌ This may fail due to RLS
@@ -521,6 +528,12 @@ await supabase.from('learning_sessions').update(data);
 // ✅ Use admin client for reliable updates
 await supabaseAdmin!.from('learning_sessions').update(data);
 ```
+
+### Missing Database Functions
+
+**Cause**: The `increment_user_xp` RPC function is not created in your Supabase database.
+
+**Solution**: Run the complete `backend/src/database/schema.sql` file in your Supabase SQL Editor to create all required functions and tables. The `increment_user_xp` function is essential for updating user XP when completing learning sessions.
 
 ### Service Key Exposed in Browser
 
