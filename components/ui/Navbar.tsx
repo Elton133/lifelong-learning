@@ -113,10 +113,10 @@ export default function LifelongLearningNav() {
                 ))} */}
 
                 {/* Mobile Sign in / Get Started */}
-                <Link href="/login" className="w-full text-center px-4 py-3 rounded-xl bg-[#9CD7FF] text-[#050A30] font-medium hover:bg-[#8A3AFF] hover:text-white transition">
+                <Link href="/login" className="w-full text-center px-4 py-3 rounded-full font-medium">
                   Sign in
                 </Link>
-                <Link href="/signup" className="w-full text-center px-4 py-3 rounded-xl bg-[#050A30] text-white font-medium hover:bg-[#8A3AFF] transition">
+                <Link href="/signup" className="w-full text-center px-4 py-3 rounded-full bg-[#050A30] text-white font-medium transition">
                   Get Started
                 </Link>
               </div>
