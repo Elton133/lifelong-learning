@@ -1,6 +1,6 @@
 "use client"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { LayoutDashboard, Target, ListMusic, Lightbulb, BarChart3, LogOut, Menu, X, Flame, Sun, Moon, Settings, User } from "lucide-react"
 import { useState, useEffect } from "react"
@@ -25,12 +25,20 @@ const navigation = [
 
 function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
+  const router = useRouter()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [userDropdownOpen, setUserDropdownOpen] = useState(false)
   const { profile } = useUser()
   const { stats } = useDashboardStats()
   const { signOut } = useAuth()
   const { theme, toggleTheme } = useTheme()
+  
+  // Check if user has completed onboarding
+  useEffect(() => {
+    if (profile && profile.onboarding_completed === false) {
+      router.push('/onboarding');
+    }
+  }, [profile, router]);
   
   // Calculate level based on XP
   const level = Math.floor((stats?.total_xp || 0) / XP_PER_LEVEL) + 1

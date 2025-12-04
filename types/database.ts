@@ -10,6 +10,7 @@ export interface Profile {
   career_goals: CareerGoal[] | null;
   interests: string[] | null;
   daily_learning_time: number | null;
+  onboarding_completed: boolean;
   streak_count: number;
   total_xp: number;
   created_at: string;

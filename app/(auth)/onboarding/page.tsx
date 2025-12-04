@@ -160,6 +160,7 @@ export default function OnboardingPage() {
           career_goals: careerGoals,
           learning_style: selectedStyle as 'visual' | 'hands-on' | 'reading' | 'audio' | 'video',
           daily_learning_time: dailyTimeMinutes,
+          onboarding_completed: true,
         })
         .eq('id', user.id);
 

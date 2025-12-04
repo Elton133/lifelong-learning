@@ -27,10 +27,8 @@ export default function LoginPage() {
     if (authError) {
       setError(authError);
       setLoading(false);
-    } else {
-      // Redirect to dashboard
-      router.push('/dashboard');
     }
+    // Don't redirect here - let useAuth handle it via onAuthStateChange
   };
 
   return (

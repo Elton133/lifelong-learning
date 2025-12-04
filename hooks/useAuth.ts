@@ -60,13 +60,31 @@ export function useAuth() {
           session,
         }));
 
-        if (event === 'SIGNED_IN') {
-          // Check if user has completed onboarding
-          const hasOnboarded = localStorage.getItem('onboardingComplete');
-          if (!hasOnboarded) {
+        if (event === 'SIGNED_IN' && session?.user) {
+          // Check if user has completed onboarding from database
+          try {
+            const { data: profile, error } = await supabase
+              .from('profiles')
+              .select('onboarding_completed')
+              .eq('id', session.user.id)
+              .single();
+            
+            if (error) {
+              console.error('Error fetching profile:', error);
+              // If profile doesn't exist, redirect to onboarding
+              router.push('/onboarding');
+              return;
+            }
+            
+            if (!profile?.onboarding_completed) {
+              router.push('/onboarding');
+            } else {
+              router.push('/dashboard');
+            }
+          } catch (error) {
+            console.error('Error checking onboarding status:', error);
+            // Default to onboarding on error
             router.push('/onboarding');
-          } else {
-            router.push('/dashboard');
           }
         }
 
