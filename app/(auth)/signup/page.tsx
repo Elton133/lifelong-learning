@@ -8,10 +8,12 @@ import { Mail, Lock, User, Building, ArrowRight, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/Card';
 import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/contexts/ToastContext';
 
 export default function SignupPage() {
   const router = useRouter();
   const { signUp, loading: authLoading } = useAuth();
+  const { success } = useToast();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -44,8 +46,16 @@ export default function SignupPage() {
       setError(authError);
       setLoading(false);
     } else {
-      // Redirect to onboarding for new users
-      router.push('/onboarding');
+      // Show success toast and redirect to login
+      success(
+        'Account Created!',
+        'Please check your email to confirm your account before signing in.',
+        6000
+      );
+      // Small delay to ensure toast is visible before redirect
+      setTimeout(() => {
+        router.push('/login');
+      }, 500);
     }
   };
 

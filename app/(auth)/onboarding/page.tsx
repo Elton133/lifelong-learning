@@ -170,7 +170,7 @@ export default function OnboardingPage() {
       }));
 
       setTimeout(() => {
-        router.push('/');
+        router.push('/dashboard');
       }, 1000);
     } catch (error) {
       console.error('Error completing onboarding:', error);

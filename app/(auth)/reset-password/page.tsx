@@ -1,19 +1,20 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Mail, Lock, ArrowRight, Sparkles } from 'lucide-react';
+import { Lock, ArrowRight, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/Card';
-import { useAuth } from '@/hooks/useAuth';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card';
+import { supabase } from '@/lib/supabase';
+import { useToast } from '@/contexts/ToastContext';
 
-export default function LoginPage() {
+export default function ResetPasswordPage() {
   const router = useRouter();
-  const { signIn, loading: authLoading } = useAuth();
-  const [email, setEmail] = useState('');
+  const searchParams = useSearchParams();
+  const { success, error: showError } = useToast();
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -22,14 +23,39 @@ export default function LoginPage() {
     setLoading(true);
     setError('');
 
-    const { error: authError } = await signIn(email, password);
-    
-    if (authError) {
-      setError(authError);
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
       setLoading(false);
-    } else {
-      // Redirect to dashboard
-      router.push('/dashboard');
+      return;
+    }
+
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: password,
+      });
+
+      if (updateError) throw updateError;
+
+      success(
+        'Password Updated!',
+        'Your password has been successfully reset. You can now sign in with your new password.',
+        6000
+      );
+      
+      setTimeout(() => {
+        router.push('/login');
+      }, 1500);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to reset password';
+      showError('Error', message);
+      setError(message);
+      setLoading(false);
     }
   };
 
@@ -76,8 +102,8 @@ export default function LoginPage() {
             >
               <span className="text-white font-bold text-lg">LL</span>
             </motion.div>
-            <CardTitle className="text-2xl">Welcome back</CardTitle>
-            <CardDescription>Sign in to continue your learning journey</CardDescription>
+            <CardTitle className="text-2xl">Reset your password</CardTitle>
+            <CardDescription>Enter your new password below</CardDescription>
           </CardHeader>
           
           <CardContent>
@@ -93,22 +119,7 @@ export default function LoginPage() {
               )}
               
               <div>
-                <label className="block text-sm font-medium mb-2">Email</label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@company.com"
-                    className="w-full pl-10 pr-4 py-2.5 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-                    required
-                  />
-                </div>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-2">Password</label>
+                <label className="block text-sm font-medium mb-2">New Password</label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                   <input
@@ -118,22 +129,30 @@ export default function LoginPage() {
                     placeholder="••••••••"
                     className="w-full pl-10 pr-4 py-2.5 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                     required
+                    minLength={8}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">Minimum 8 characters</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Confirm Password</label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  <input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full pl-10 pr-4 py-2.5 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                    required
+                    minLength={8}
                   />
                 </div>
               </div>
 
-              <div className="flex items-center justify-between text-sm">
-                <label className="flex items-center gap-2">
-                  <input type="checkbox" className="rounded border-border" />
-                  <span className="text-muted-foreground">Remember me</span>
-                </label>
-                <Link href="/forgot-password" className="text-primary hover:underline">
-                  Forgot password?
-                </Link>
-              </div>
-
-              <Button type="submit" disabled={loading || authLoading} className="w-full">
-                {loading || authLoading ? (
+              <Button type="submit" disabled={loading} className="w-full">
+                {loading ? (
                   <motion.div
                     animate={{ rotate: 360 }}
                     transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
@@ -142,22 +161,13 @@ export default function LoginPage() {
                   </motion.div>
                 ) : (
                   <>
-                    Sign in
+                    Reset Password
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </>
                 )}
               </Button>
             </form>
           </CardContent>
-
-          <CardFooter className="justify-center">
-            <p className="text-sm text-muted-foreground">
-              Don&apos;t have an account?{' '}
-              <Link href="/signup" className="text-primary hover:underline font-medium">
-                Sign up
-              </Link>
-            </p>
-          </CardFooter>
         </Card>
       </motion.div>
     </div>
