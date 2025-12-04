@@ -29,7 +29,7 @@ export default function LoginPage() {
       setLoading(false);
     } else {
       // Redirect to dashboard
-      router.push('/');
+      router.push('/dashboard');
     }
   };
 
@@ -127,7 +127,9 @@ export default function LoginPage() {
                   <input type="checkbox" className="rounded border-border" />
                   <span className="text-muted-foreground">Remember me</span>
                 </label>
-                <a href="#" className="text-primary hover:underline">Forgot password?</a>
+                <Link href="/forgot-password" className="text-primary hover:underline">
+                  Forgot password?
+                </Link>
               </div>
 
               <Button type="submit" disabled={loading || authLoading} className="w-full">

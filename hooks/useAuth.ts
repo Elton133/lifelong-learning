@@ -66,7 +66,7 @@ export function useAuth() {
           if (!hasOnboarded) {
             router.push('/onboarding');
           } else {
-            router.push('/');
+            router.push('/dashboard');
           }
         }
 
@@ -85,7 +85,7 @@ export function useAuth() {
     if (!isSupabaseConfigured) {
       // Mock sign in for demo
       localStorage.setItem('mockUser', JSON.stringify({ email }));
-      router.push('/');
+      router.push('/dashboard');
       return { error: null };
     }
 
@@ -122,7 +122,6 @@ export function useAuth() {
     if (!isSupabaseConfigured) {
       // Mock sign up for demo
       localStorage.setItem('mockUser', JSON.stringify({ email, ...metadata }));
-      router.push('/onboarding');
       return { error: null };
     }
 
@@ -146,15 +145,14 @@ export function useAuth() {
         loading: false,
       }));
 
-      // Redirect to onboarding for new users
-      router.push('/onboarding');
+      // Don't automatically redirect - let the calling component handle it
       return { error: null };
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Sign up failed';
       setState(prev => ({ ...prev, loading: false, error: message }));
       return { error: message };
     }
-  }, [router]);
+  }, []);
 
   const signOut = useCallback(async () => {
     if (!isSupabaseConfigured) {

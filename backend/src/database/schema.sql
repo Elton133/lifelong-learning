@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS profiles (
   learning_style TEXT CHECK (learning_style IN ('visual', 'hands-on', 'reading', 'video', 'audio')),
   career_goals JSONB DEFAULT '[]'::jsonb,
   interests TEXT[] DEFAULT '{}',
+  daily_learning_time INTEGER DEFAULT 30,
   streak_count INTEGER DEFAULT 0,
   total_xp INTEGER DEFAULT 0,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),

@@ -9,6 +9,7 @@ export interface Profile {
   learning_style: 'visual' | 'hands-on' | 'reading' | 'video' | 'audio' | null;
   career_goals: CareerGoal[] | null;
   interests: string[] | null;
+  daily_learning_time: number | null;
   streak_count: number;
   total_xp: number;
   created_at: string;

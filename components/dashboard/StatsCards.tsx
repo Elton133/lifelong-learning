@@ -9,11 +9,11 @@ import type { DashboardStats } from '@/types/database';
 
 interface StatsCardsProps {
   stats: DashboardStats;
+  dailyGoal?: number;
   className?: string;
 }
 
-export function StatsCards({ stats, className }: StatsCardsProps) {
-  const dailyGoal = 30; // 30 minutes daily goal
+export function StatsCards({ stats, dailyGoal = 30, className }: StatsCardsProps) {
   const dailyProgress = Math.min((stats.time_invested_today / dailyGoal) * 100, 100);
 
   const cards = [
