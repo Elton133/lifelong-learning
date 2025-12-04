@@ -54,7 +54,7 @@ export default function SignupPage() {
       );
       // Small delay to ensure toast is visible before redirect
       setTimeout(() => {
-        router.push('/onboarding');
+        router.push('/login');
       }, 500);
     }
   };

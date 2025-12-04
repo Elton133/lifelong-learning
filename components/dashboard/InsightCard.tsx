@@ -101,7 +101,7 @@ export function InsightsPreview({ insights, onDismiss, className }: InsightsPrev
     <div className={className}>
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold">AI Insights</h2>
-        <Link href="/insights">
+        <Link href="/dashboard/insights">
           <Button variant="ghost" size="sm">
             View all
             <ChevronRight className="w-4 h-4 ml-1" />

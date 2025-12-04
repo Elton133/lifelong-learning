@@ -107,7 +107,7 @@ export function PlaylistPreview({ contents, title = "Today's Learning Path", cla
     <div className={className}>
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold">{title}</h2>
-        <Link href="/playlist">
+        <Link href="/dashboard/playlist">
           <Button variant="ghost" size="sm">
             View all
             <ChevronRight className="w-4 h-4 ml-1" />

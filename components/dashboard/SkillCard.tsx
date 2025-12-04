@@ -103,7 +103,7 @@ export function SkillsPreview({ skills, className }: SkillsPreviewProps) {
     <div className={className}>
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold">Top Skills</h2>
-        <Link href="/skills">
+        <Link href="/dashboard/skills">
           <Button variant="ghost" size="sm">
             View all
             <ChevronRight className="w-4 h-4 ml-1" />
