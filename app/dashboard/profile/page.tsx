@@ -1,10 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { User, Mail, Briefcase, Building2, Calendar, Award, Upload, Sparkles } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
 import { useUser } from '@/hooks/useUser';
 import { useToast } from '@/contexts/ToastContext';
 import { supabase } from '@/lib/supabase/client';
@@ -12,7 +10,6 @@ import { supabase } from '@/lib/supabase/client';
 export default function ProfilePage() {
   const { profile } = useUser();
   const { info } = useToast();
-  const [uploading, setUploading] = useState(false);
   const [userEmail, setUserEmail] = useState<string>('');
 
   useEffect(() => {
