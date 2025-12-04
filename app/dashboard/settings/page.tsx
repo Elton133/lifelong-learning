@@ -179,9 +179,11 @@ export default function SettingsPage() {
         updates.learning_style = formData.learning_style as 'visual' | 'hands-on' | 'reading' | 'video' | 'audio';
       }
       
+      console.log('Updating profile with:', updates);
       await updateProfile(updates);
       success('Settings Updated', 'Your preferences have been saved successfully.');
     } catch (err) {
+      console.error('Error updating settings:', err);
       showError('Error', 'Failed to update settings. Please try again.');
     } finally {
       setLoading(false);

@@ -1,17 +1,29 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { User, Mail, Briefcase, Building2, Calendar, Award, Upload, Sparkles } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { useUser } from '@/hooks/useUser';
 import { useToast } from '@/contexts/ToastContext';
+import { supabase } from '@/lib/supabase/client';
 
 export default function ProfilePage() {
   const { profile } = useUser();
   const { info } = useToast();
   const [uploading, setUploading] = useState(false);
+  const [userEmail, setUserEmail] = useState<string>('');
+
+  useEffect(() => {
+    async function fetchUserEmail() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user?.email) {
+        setUserEmail(user.email);
+      }
+    }
+    fetchUserEmail();
+  }, []);
 
   const getInitials = (name: string | null | undefined) => {
     if (!name) return 'U';
@@ -107,7 +119,7 @@ export default function ProfilePage() {
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-muted-foreground mb-1">Email</p>
                 <p className="text-sm text-foreground truncate">
-                  {profile.id.substring(0, 8)}...@example.com
+                  {userEmail || 'Loading...'}
                 </p>
               </div>
             </div>
