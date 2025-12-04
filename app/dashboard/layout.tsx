@@ -32,6 +32,13 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
   const { signOut } = useAuth()
   const { theme, toggleTheme } = useTheme()
   
+  // Check if user has completed onboarding
+  useEffect(() => {
+    if (profile && profile.onboarding_completed === false) {
+      window.location.href = '/onboarding';
+    }
+  }, [profile]);
+  
   // Calculate level based on XP
   const level = Math.floor((stats?.total_xp || 0) / XP_PER_LEVEL) + 1
   
