@@ -49,7 +49,7 @@ export default function SignupPage() {
       // Show success toast and redirect to onboarding
       success(
         'Account Created!',
-        'Let\'s personalize your learning experience.',
+        "Let's personalize your learning experience.",
         6000
       );
       // Small delay to ensure toast is visible before redirect
