@@ -78,7 +78,7 @@ const TIME_COMMITMENTS = [
 ];
 
 export default function SettingsPage() {
-  const { profile, updateProfile } = useUser();
+  const { profile, updateProfile, refetch } = useUser();
   const { success, error: showError } = useToast();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<{
@@ -180,8 +180,13 @@ export default function SettingsPage() {
       }
       
       console.log('Updating profile with:', updates);
-      await updateProfile(updates);
-      success('Settings Updated', 'Your preferences have been saved successfully.');
+      const result = await updateProfile(updates);
+      
+      if (result) {
+        // Force a refetch to ensure UI is in sync
+        await refetch();
+        success('Settings Updated', 'Your preferences have been saved successfully.');
+      }
     } catch (err) {
       console.error('Error updating settings:', err);
       showError('Error', 'Failed to update settings. Please try again.');
@@ -260,7 +265,7 @@ export default function SettingsPage() {
               </div>
               <div>
                 <CardTitle>Interests</CardTitle>
-                <CardDescription>Select topics you'd like to explore</CardDescription>
+                <CardDescription>Select topics you&apos;d like to explore</CardDescription>
               </div>
             </div>
           </CardHeader>
