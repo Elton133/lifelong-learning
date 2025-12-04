@@ -60,10 +60,15 @@ export function useAuth() {
           session,
         }));
 
-        if (event === 'SIGNED_IN') {
-          // Check if user has completed onboarding
-          const hasOnboarded = localStorage.getItem('onboardingComplete');
-          if (!hasOnboarded) {
+        if (event === 'SIGNED_IN' && session?.user) {
+          // Check if user has completed onboarding from database
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('onboarding_completed')
+            .eq('id', session.user.id)
+            .single();
+          
+          if (!profile?.onboarding_completed) {
             router.push('/onboarding');
           } else {
             router.push('/dashboard');
