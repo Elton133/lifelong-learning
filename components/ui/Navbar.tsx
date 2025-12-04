@@ -54,10 +54,10 @@ export default function LifelongLearningNav() {
 
         {/* Actions + Mobile Toggle */}
         <div className="flex items-center gap-2 md:gap-4">
-          <Link href="/login" className="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#9CD7FF] text-[#050A30] hover:bg-[#8A3AFF] hover:text-white transition">
+          <Link href="/login" className="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-full hover:bg-gray-100  transition">
             Sign in
           </Link>
-          <Link href="/signup" className="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#050A30] text-white hover:bg-[#8A3AFF] transition">
+          <Link href="/signup" className="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#050A30] text-white transition">
             Get Started <ArrowRight className="w-4 h-4" />
           </Link>
 
