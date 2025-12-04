@@ -144,6 +144,9 @@ export default function OnboardingPage() {
           };
         });
 
+        // Convert selected time to minutes
+        const dailyTimeMinutes = parseInt(selectedTime, 10);
+
         // Update profile with onboarding data
         const { error } = await supabase
           .from('profiles')
@@ -151,6 +154,7 @@ export default function OnboardingPage() {
             interests: selectedInterests,
             career_goals: careerGoals,
             learning_style: selectedStyle as 'visual' | 'hands-on' | 'reading' | 'audio' | 'video',
+            daily_learning_time: dailyTimeMinutes,
           })
           .eq('id', user.id);
 

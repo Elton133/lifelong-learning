@@ -104,7 +104,7 @@ export default function DashboardPage() {
 
         {/* Stats Cards */}
         <motion.div variants={fadeInUp} data-tour="stats">
-          {stats && <StatsCards stats={stats} />}
+          {stats && profile && <StatsCards stats={stats} dailyGoal={profile.daily_learning_time || 30} />}
         </motion.div>
 
         {/* Main Content Grid */}
