@@ -14,9 +14,17 @@ export default function ProfilePage() {
 
   useEffect(() => {
     async function fetchUserEmail() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user?.email) {
-        setUserEmail(user.email);
+      try {
+        const { data: { user }, error } = await supabase.auth.getUser();
+        if (error) {
+          console.error('Error fetching user email:', error);
+          return;
+        }
+        if (user?.email) {
+          setUserEmail(user.email);
+        }
+      } catch (error) {
+        console.error('Error fetching user email:', error);
       }
     }
     fetchUserEmail();

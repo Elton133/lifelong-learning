@@ -496,7 +496,7 @@ export default function OnboardingPage() {
                   Please sign in to start your journey!
                 </p>
 
-                <Card className="max-w-md mx-auto p-4 sm:p-6 bg-gradient-to-br from-primary/5 to-secondary/5 mx-4 sm:mx-auto">
+                <Card className="max-w-md p-4 sm:p-6 bg-gradient-to-br from-primary/5 to-secondary/5 mx-4 sm:mx-auto">
                   <h3 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Your Learning Profile</h3>
                   <div className="space-y-2 sm:space-y-3 text-xs sm:text-sm text-left">
                     <div className="flex justify-between">
