@@ -30,6 +30,13 @@
   --warning: #f59e0b;
   --error: #ef4444;
 }
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --muted: #27272a;
+  --muted-foreground: #a1a1aa;
+  --border: #3f3f46;
+}
 
 @theme inline {
   --color-background: var(--background);

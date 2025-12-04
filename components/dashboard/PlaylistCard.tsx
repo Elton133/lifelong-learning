@@ -83,7 +83,7 @@ export function PlaylistCard({ content, index, className }: PlaylistCardProps) {
                 {formatDuration(content.estimated_duration)}
               </span>
             </div>
-            <Link href={`/learn/${content.id}`}>
+            <Link href={`/dashboard/learn/${content.id}`}>
               <Button size="sm" variant="ghost" className="group-hover:bg-primary group-hover:text-white transition-colors">
                 Start
                 <ChevronRight className="w-4 h-4 ml-1" />

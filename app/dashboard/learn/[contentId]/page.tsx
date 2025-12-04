@@ -135,22 +135,6 @@ function QuizPlayer({
   );
 }
 
-// Video Player Component
-// function VideoPlayer({ url }: { url: string }) {
-//   return (
-//     <Card>
-//       <CardContent className="pt-6">
-//         <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
-//           <div className="text-center">
-//             <p className="text-muted-foreground">Video Player Placeholder</p>
-//             <p className="text-sm text-muted-foreground mt-1">{url}</p>
-//           </div>
-//         </div>
-//       </CardContent>
-//     </Card>
-//   );
-// }
-
 // Completion Screen
 function CompletionScreen({ 
   score, 
@@ -248,7 +232,7 @@ export default function LearnPage() {
         <CompletionScreen 
           score={finalScore} 
           xpEarned={xpEarned} 
-          onClose={() => router.push('/')}
+          onClose={() => router.push('/dashboard')}
         />
       </div>
     );
