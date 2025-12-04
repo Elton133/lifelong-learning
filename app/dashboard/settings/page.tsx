@@ -101,11 +101,26 @@ export default function SettingsPage() {
 
   useEffect(() => {
     if (profile) {
-      // Extract goal IDs from career_goals objects
+      // Extract goal IDs from career_goals objects with better mapping
       const goalIds = (profile.career_goals || []).map(goal => {
         // Try to match the goal title to a known goal ID
-        const matchingGoal = LEARNING_GOALS.find(g => g.name === goal.title);
-        return matchingGoal?.id || goal.title.toLowerCase().replace(/\s+/g, '-');
+        const matchingGoal = LEARNING_GOALS.find(g => 
+          g.name.toLowerCase() === goal.title.toLowerCase()
+        );
+        // If we find a match, use its ID, otherwise keep the original title
+        if (matchingGoal) {
+          return matchingGoal.id;
+        }
+        // Fallback: try to reverse engineer from common patterns
+        const titleLower = goal.title.toLowerCase();
+        if (titleLower.includes('career') && !titleLower.includes('switch')) return 'career';
+        if (titleLower.includes('hobby') || titleLower.includes('explore')) return 'hobby';
+        if (titleLower.includes('switch')) return 'switch';
+        if (titleLower.includes('updated') || titleLower.includes('stay')) return 'stay-updated';
+        if (titleLower.includes('side') || titleLower.includes('project')) return 'side-project';
+        if (titleLower.includes('personal') || titleLower.includes('growth')) return 'personal-growth';
+        // Last resort: convert to ID format
+        return goal.title.toLowerCase().replace(/\s+/g, '-');
       });
       
       setFormData({
@@ -243,7 +258,7 @@ export default function SettingsPage() {
               </div>
               <div>
                 <CardTitle>Interests</CardTitle>
-                <CardDescription>Select topics you&apos;d like to explore</CardDescription>
+                <CardDescription>Select topics you'd like to explore</CardDescription>
               </div>
             </div>
           </CardHeader>
