@@ -135,32 +135,38 @@ export default function OnboardingPage() {
       const { supabase } = await import('@/lib/supabase/client');
       const { data: { user } } = await supabase.auth.getUser();
       
-      if (user) {
-        // Convert selectedGoals array to career_goals format
-        const careerGoals = selectedGoals.map(goalId => {
-          const goal = LEARNING_GOALS.find(g => g.id === goalId);
-          return {
-            title: goal?.name || goalId,
-          };
-        });
+      if (!user) {
+        console.error('No authenticated user found');
+        setIsSubmitting(false);
+        return;
+      }
 
-        // Convert selected time to minutes
-        const dailyTimeMinutes = parseInt(selectedTime, 10);
+      // Convert selectedGoals array to career_goals format
+      const careerGoals = selectedGoals.map(goalId => {
+        const goal = LEARNING_GOALS.find(g => g.id === goalId);
+        return {
+          title: goal?.name || goalId,
+        };
+      });
 
-        // Update profile with onboarding data
-        const { error } = await supabase
-          .from('profiles')
-          .update({
-            interests: selectedInterests,
-            career_goals: careerGoals,
-            learning_style: selectedStyle as 'visual' | 'hands-on' | 'reading' | 'audio' | 'video',
-            daily_learning_time: dailyTimeMinutes,
-          })
-          .eq('id', user.id);
+      // Convert selected time to minutes
+      const dailyTimeMinutes = parseInt(selectedTime, 10);
 
-        if (error) {
-          console.error('Error saving onboarding data:', error);
-        }
+      // Update profile with onboarding data
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          interests: selectedInterests,
+          career_goals: careerGoals,
+          learning_style: selectedStyle as 'visual' | 'hands-on' | 'reading' | 'audio' | 'video',
+          daily_learning_time: dailyTimeMinutes,
+        })
+        .eq('id', user.id);
+
+      if (error) {
+        console.error('Error saving onboarding data:', error);
+        setIsSubmitting(false);
+        return;
       }
 
       // Save onboarding data to localStorage for tour trigger and preferences
@@ -174,7 +180,7 @@ export default function OnboardingPage() {
       }));
 
       setTimeout(() => {
-        router.push('/login');
+        router.push('/dashboard');
       }, 1000);
     } catch (error) {
       console.error('Error completing onboarding:', error);
