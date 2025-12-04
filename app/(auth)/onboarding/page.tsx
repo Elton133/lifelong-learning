@@ -174,7 +174,7 @@ export default function OnboardingPage() {
       }));
 
       setTimeout(() => {
-        router.push('/dashboard');
+        router.push('/login');
       }, 1000);
     } catch (error) {
       console.error('Error completing onboarding:', error);
@@ -486,7 +486,7 @@ export default function OnboardingPage() {
                 <h1 className="text-3xl font-bold mb-2">You&apos;re all set!</h1>
                 <p className="text-muted-foreground max-w-md mx-auto">
                   We&apos;ve personalized your learning experience based on your preferences. 
-                  Ready to start your journey?
+                  Please sign in to start your journey!
                 </p>
 
                 <Card className="max-w-md mx-auto p-6 bg-gradient-to-br from-primary/5 to-secondary/5">
@@ -517,7 +517,7 @@ export default function OnboardingPage() {
                   disabled={isSubmitting}
                   className="mt-6"
                 >
-                  {isSubmitting ? 'Setting up...' : 'Start Learning'}
+                  {isSubmitting ? 'Setting up...' : 'Continue to Sign In'}
                   <Sparkles className="w-5 h-5 ml-2" />
                 </Button>
               </motion.div>
