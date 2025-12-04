@@ -2,8 +2,8 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
-import { LayoutDashboard, Target, ListMusic, Lightbulb, BarChart3, LogOut, Menu, X, Flame, Sun, Moon } from "lucide-react"
-import { useState } from "react"
+import { LayoutDashboard, Target, ListMusic, Lightbulb, BarChart3, LogOut, Menu, X, Flame, Sun, Moon, Settings, User } from "lucide-react"
+import { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
 import { SWRProvider } from "@/lib/swr-provider"
 import { useUser, useDashboardStats } from "@/hooks/useUser"
@@ -20,11 +20,13 @@ const navigation = [
   { name: "Playlist", href: "/dashboard/playlist", icon: ListMusic },
   { name: "Insights", href: "/dashboard/insights", icon: Lightbulb },
   { name: "Progress", href: "/dashboard/progress", icon: BarChart3 },
+  { name: "Settings", href: "/dashboard/settings", icon: Settings },
 ]
 
 function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false)
   const { profile } = useUser()
   const { stats } = useDashboardStats()
   const { signOut } = useAuth()
@@ -205,12 +207,80 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
                 <p className="text-sm font-semibold text-foreground">{(stats?.total_xp || 0).toLocaleString()} XP</p>
                 <p className="text-xs text-muted-foreground">Level {level}</p>
               </div>
-              <motion.div 
-                whileHover={{ scale: 1.05 }}
-                className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center cursor-pointer"
-              >
-                <span className="text-white font-bold text-sm">{getInitials(profile?.full_name)}</span>
-              </motion.div>
+              
+              {/* User Dropdown */}
+              <div className="relative">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                  className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                >
+                  <span className="text-white font-bold text-sm">{getInitials(profile?.full_name)}</span>
+                </motion.button>
+                
+                <AnimatePresence>
+                  {userDropdownOpen && (
+                    <>
+                      {/* Backdrop */}
+                      <div
+                        className="fixed inset-0 z-10"
+                        onClick={() => setUserDropdownOpen(false)}
+                      />
+                      
+                      {/* Dropdown Menu */}
+                      <motion.div
+                        initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute right-0 top-full mt-2 w-64 bg-white dark:bg-slate-950 rounded-xl shadow-lg border border-border overflow-hidden z-20"
+                      >
+                        {/* User Info */}
+                        <div className="p-4 border-b border-border bg-muted/50">
+                          <p className="font-semibold text-foreground truncate">
+                            {profile?.full_name || 'User'}
+                          </p>
+                          <p className="text-xs text-muted-foreground truncate">
+                            {profile?.role || 'Learner'}
+                          </p>
+                        </div>
+                        
+                        {/* Menu Items */}
+                        <div className="py-2">
+                          <Link
+                            href="/dashboard/profile"
+                            onClick={() => setUserDropdownOpen(false)}
+                            className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-muted transition-colors"
+                          >
+                            <User className="w-4 h-4" />
+                            <span>Profile</span>
+                          </Link>
+                          
+                          <Link
+                            href="/dashboard/settings"
+                            onClick={() => setUserDropdownOpen(false)}
+                            className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-muted transition-colors"
+                          >
+                            <Settings className="w-4 h-4" />
+                            <span>Settings</span>
+                          </Link>
+                          
+                          <button
+                            onClick={() => {
+                              setUserDropdownOpen(false);
+                              handleSignOut();
+                            }}
+                            className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-muted transition-colors w-full text-left text-red-600 dark:text-red-400"
+                          >
+                            <LogOut className="w-4 h-4" />
+                            <span>Sign out</span>
+                          </button>
+                        </div>
+                      </motion.div>
+                    </>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
           </div>
         </header>
