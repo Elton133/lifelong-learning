@@ -46,15 +46,15 @@ export default function SignupPage() {
       setError(authError);
       setLoading(false);
     } else {
-      // Show success toast and redirect to login
+      // Show success toast and redirect to onboarding
       success(
         'Account Created!',
-        'Please check your email to confirm your account before signing in.',
+        'Let\'s personalize your learning experience.',
         6000
       );
       // Small delay to ensure toast is visible before redirect
       setTimeout(() => {
-        router.push('/login');
+        router.push('/onboarding');
       }, 500);
     }
   };
