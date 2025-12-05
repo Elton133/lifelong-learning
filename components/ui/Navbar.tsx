@@ -54,7 +54,7 @@ export default function LifelongLearningNav() {
 
         {/* Actions + Mobile Toggle */}
         <div className="flex items-center gap-2 md:gap-4">
-          <Link href="/login" className="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-full hover:bg-gray-100  transition">
+          <Link href="/login" className="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-full hover:bg-gray-700  transition">
             Sign in
           </Link>
           <Link href="/signup" className="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#050A30] text-white transition">
@@ -113,7 +113,7 @@ export default function LifelongLearningNav() {
                 ))} */}
 
                 {/* Mobile Sign in / Get Started */}
-                <Link href="/login" className="w-full text-center px-4 py-3 rounded-full font-medium hover:bg-gray-100 transition" >
+                <Link href="/login" className="w-full text-center px-4 py-3 rounded-full font-medium hover:bg-gray-700 transition" >
                   Sign in
                 </Link>
                 <Link href="/signup" className="w-full text-center px-4 py-3 rounded-full bg-[#050A30] text-white font-medium hover:bg-[#130e1a] transition">

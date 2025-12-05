@@ -91,7 +91,7 @@ export default function DashboardPage() {
         >
           <div className="flex-1">
             <h1 className="text-2xl font-bold">
-              Welcome back, {profile?.full_name?.split(' ')[0] || 'Learner'}! 👋
+              Welcome back, {profile?.full_name?.split(' ')[0] || 'Learner'}!
             </h1>
             <p className="text-muted-foreground mt-1">
               Ready to continue your learning journey?
