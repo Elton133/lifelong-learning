@@ -196,9 +196,9 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5 p-4 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5 p-4 flex flex-col overflow-hidden">
       {/* Progress bar */}
-      <div className="max-w-3xl mx-auto w-full mb-8 pt-8">
+      <div className="max-w-3xl mx-auto w-full mb-4 sm:mb-8 pt-4 sm:pt-8 flex-shrink-0">
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-medium text-muted-foreground">
             Step {currentStepIndex + 1} of {STEPS.length}
@@ -218,8 +218,8 @@ export default function OnboardingPage() {
       </div>
 
       {/* Main content */}
-      <div className="flex-1 flex items-center justify-center">
-        <div className="max-w-3xl w-full">
+      <div className="flex-1 flex items-center justify-center overflow-y-auto min-h-0 pb-4 sm:pb-0">
+        <div className="max-w-3xl w-full px-2 sm:px-0">
           <AnimatePresence mode="wait">
             {/* Step 1: Interests */}
             {currentStep === 'interests' && (
@@ -229,23 +229,23 @@ export default function OnboardingPage() {
                 initial="initial"
                 animate="animate"
                 exit="exit"
-                className="space-y-6"
+                className="space-y-4 sm:space-y-6"
               >
-                <div className="text-center mb-8">
+                <div className="text-center mb-4 sm:mb-8">
                   <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center"
+                    className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center"
                   >
-                    <Sparkles className="w-8 h-8 text-white" />
+                    <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                   </motion.div>
-                  <h1 className="text-3xl font-bold mb-2">What interests you?</h1>
-                  <p className="text-muted-foreground">
+                  <h1 className="text-2xl sm:text-3xl font-bold mb-2">What interests you?</h1>
+                  <p className="text-sm sm:text-base text-muted-foreground px-4">
                     Select at least 3 topics you&apos;d like to explore. Choose as many as you want!
                   </p>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3">
                   {INTERESTS.map((interest, index) => {
                     const Icon = interest.icon;
                     const isSelected = selectedInterests.includes(interest.id);
@@ -257,26 +257,26 @@ export default function OnboardingPage() {
                         transition={{ delay: index * 0.03 }}
                         onClick={() => toggleInterest(interest.id)}
                         className={cn(
-                          'relative p-4 rounded-xl border-2 transition-all duration-200 group',
+                          'relative p-3 sm:p-4 rounded-xl border-2 transition-all duration-200 group',
                           isSelected 
                             ? 'border-primary bg-primary/10 shadow-lg scale-105' 
                             : 'border-border hover:border-primary/50 hover:shadow-md'
                         )}
                       >
                         <div className={cn(
-                          'w-10 h-10 mx-auto mb-2 rounded-lg bg-gradient-to-br flex items-center justify-center',
+                          'w-8 h-8 sm:w-10 sm:h-10 mx-auto mb-1.5 sm:mb-2 rounded-lg bg-gradient-to-br flex items-center justify-center',
                           interest.color
                         )}>
-                          <Icon className="w-5 h-5 text-white" />
+                          <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                         </div>
-                        <span className="text-sm font-medium">{interest.name}</span>
+                        <span className="text-xs sm:text-sm font-medium block text-center">{interest.name}</span>
                         {isSelected && (
                           <motion.div
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
-                            className="absolute -top-2 -right-2 w-6 h-6 bg-primary rounded-full flex items-center justify-center"
+                            className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 w-5 h-5 sm:w-6 sm:h-6 bg-primary rounded-full flex items-center justify-center"
                           >
-                            <Check className="w-4 h-4 text-white" />
+                            <Check className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
                           </motion.div>
                         )}
                       </motion.button>
@@ -284,7 +284,7 @@ export default function OnboardingPage() {
                   })}
                 </div>
 
-                <p className="text-center text-sm text-muted-foreground">
+                <p className="text-center text-xs sm:text-sm text-muted-foreground">
                   {selectedInterests.length} selected {selectedInterests.length < 3 && `(${3 - selectedInterests.length} more needed)`}
                 </p>
               </motion.div>
@@ -298,23 +298,23 @@ export default function OnboardingPage() {
                 initial="initial"
                 animate="animate"
                 exit="exit"
-                className="space-y-6"
+                className="space-y-4 sm:space-y-6"
               >
-                <div className="text-center mb-8">
+                <div className="text-center mb-4 sm:mb-8">
                   <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-secondary to-primary flex items-center justify-center"
+                    className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 rounded-2xl bg-gradient-to-br from-secondary to-primary flex items-center justify-center"
                   >
-                    <TrendingUp className="w-8 h-8 text-white" />
+                    <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                   </motion.div>
-                  <h1 className="text-3xl font-bold mb-2">What are your goals?</h1>
-                  <p className="text-muted-foreground">
+                  <h1 className="text-2xl sm:text-3xl font-bold mb-2">What are your goals?</h1>
+                  <p className="text-sm sm:text-base text-muted-foreground px-4">
                     Select one or more learning goals that match your aspirations.
                   </p>
                 </div>
 
-                <div className="grid gap-3 max-w-xl mx-auto">
+                <div className="grid gap-2 sm:gap-3 max-w-xl mx-auto">
                   {LEARNING_GOALS.map((goal, index) => {
                     const isSelected = selectedGoals.includes(goal.id);
                     return (
@@ -325,25 +325,25 @@ export default function OnboardingPage() {
                         transition={{ delay: index * 0.05 }}
                         onClick={() => toggleGoal(goal.id)}
                         className={cn(
-                          'relative p-4 rounded-xl border-2 text-left transition-all duration-200 flex items-center gap-4',
+                          'relative p-3 sm:p-4 rounded-xl border-2 text-left transition-all duration-200 flex items-center gap-3 sm:gap-4',
                           isSelected 
                             ? 'border-primary bg-primary/10 shadow-lg' 
                             : 'border-border hover:border-primary/50 hover:shadow-md'
                         )}
                       >
                         <div className={cn(
-                          'w-12 h-12 rounded-full flex items-center justify-center shrink-0 transition-colors',
+                          'w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center shrink-0 transition-colors',
                           isSelected ? 'bg-primary' : 'bg-muted'
                         )}>
                           {isSelected ? (
-                            <Check className="w-6 h-6 text-white" />
+                            <Check className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                           ) : (
-                            <div className="w-6 h-6 rounded-full border-2 border-muted-foreground" />
+                            <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 border-muted-foreground" />
                           )}
                         </div>
-                        <div>
-                          <h3 className="font-semibold">{goal.name}</h3>
-                          <p className="text-sm text-muted-foreground">{goal.description}</p>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-sm sm:text-base">{goal.name}</h3>
+                          <p className="text-xs sm:text-sm text-muted-foreground">{goal.description}</p>
                         </div>
                       </motion.button>
                     );
@@ -360,23 +360,23 @@ export default function OnboardingPage() {
                 initial="initial"
                 animate="animate"
                 exit="exit"
-                className="space-y-6"
+                className="space-y-4 sm:space-y-6"
               >
-                <div className="text-center mb-8">
+                <div className="text-center mb-4 sm:mb-8">
                   <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-accent to-primary flex items-center justify-center"
+                    className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 rounded-2xl bg-gradient-to-br from-accent to-primary flex items-center justify-center"
                   >
-                    <Brain className="w-8 h-8 text-white" />
+                    <Brain className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                   </motion.div>
-                  <h1 className="text-3xl font-bold mb-2">How do you learn best?</h1>
-                  <p className="text-muted-foreground">
+                  <h1 className="text-2xl sm:text-3xl font-bold mb-2">How do you learn best?</h1>
+                  <p className="text-sm sm:text-base text-muted-foreground px-4">
                     We&apos;ll personalize content based on your preferred learning style.
                   </p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 max-w-xl mx-auto">
+                <div className="grid grid-cols-2 gap-3 sm:gap-4 max-w-xl mx-auto">
                   {LEARNING_STYLES.map((style, index) => {
                     const isSelected = selectedStyle === style.id;
                     return (
@@ -387,22 +387,22 @@ export default function OnboardingPage() {
                         transition={{ delay: index * 0.05 }}
                         onClick={() => setSelectedStyle(style.id)}
                         className={cn(
-                          'relative p-6 rounded-xl border-2 text-center transition-all duration-200',
+                          'relative p-4 sm:p-6 rounded-xl border-2 text-center transition-all duration-200',
                           isSelected 
                             ? 'border-primary bg-primary/10 shadow-lg scale-105' 
                             : 'border-border hover:border-primary/50 hover:shadow-md'
                         )}
                       >
-                        <div className="text-4xl mb-3">{style.icon}</div>
-                        <h3 className="font-semibold mb-1">{style.name}</h3>
+                        <div className="text-3xl sm:text-4xl mb-2 sm:mb-3">{style.icon}</div>
+                        <h3 className="font-semibold text-sm sm:text-base mb-1">{style.name}</h3>
                         <p className="text-xs text-muted-foreground">{style.description}</p>
                         {isSelected && (
                           <motion.div
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
-                            className="absolute -top-2 -right-2 w-6 h-6 bg-primary rounded-full flex items-center justify-center"
+                            className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 w-5 h-5 sm:w-6 sm:h-6 bg-primary rounded-full flex items-center justify-center"
                           >
-                            <Check className="w-4 h-4 text-white" />
+                            <Check className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
                           </motion.div>
                         )}
                       </motion.button>
@@ -420,23 +420,23 @@ export default function OnboardingPage() {
                 initial="initial"
                 animate="animate"
                 exit="exit"
-                className="space-y-6"
+                className="space-y-4 sm:space-y-6"
               >
-                <div className="text-center mb-8">
+                <div className="text-center mb-4 sm:mb-8">
                   <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-success to-primary flex items-center justify-center text-3xl"
+                    className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 rounded-2xl bg-gradient-to-br from-success to-primary flex items-center justify-center text-2xl sm:text-3xl"
                   >
                     ⏰
                   </motion.div>
-                  <h1 className="text-3xl font-bold mb-2">Daily learning time?</h1>
-                  <p className="text-muted-foreground">
+                  <h1 className="text-2xl sm:text-3xl font-bold mb-2">Daily learning time?</h1>
+                  <p className="text-sm sm:text-base text-muted-foreground px-4">
                     How much time can you dedicate to learning each day?
                   </p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 max-w-xl mx-auto">
+                <div className="grid grid-cols-2 gap-3 sm:gap-4 max-w-xl mx-auto">
                   {TIME_COMMITMENTS.map((time, index) => {
                     const isSelected = selectedTime === time.id;
                     return (
@@ -447,21 +447,21 @@ export default function OnboardingPage() {
                         transition={{ delay: index * 0.05 }}
                         onClick={() => setSelectedTime(time.id)}
                         className={cn(
-                          'relative p-6 rounded-xl border-2 text-center transition-all duration-200',
+                          'relative p-4 sm:p-6 rounded-xl border-2 text-center transition-all duration-200',
                           isSelected 
                             ? 'border-primary bg-primary/10 shadow-lg scale-105' 
                             : 'border-border hover:border-primary/50 hover:shadow-md'
                         )}
                       >
-                        <h3 className="text-2xl font-bold mb-1">{time.name}</h3>
-                        <p className="text-sm text-muted-foreground">{time.description}</p>
+                        <h3 className="text-xl sm:text-2xl font-bold mb-1">{time.name}</h3>
+                        <p className="text-xs sm:text-sm text-muted-foreground">{time.description}</p>
                         {isSelected && (
                           <motion.div
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
-                            className="absolute -top-2 -right-2 w-6 h-6 bg-primary rounded-full flex items-center justify-center"
+                            className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 w-5 h-5 sm:w-6 sm:h-6 bg-primary rounded-full flex items-center justify-center"
                           >
-                            <Check className="w-4 h-4 text-white" />
+                            <Check className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
                           </motion.div>
                         )}
                       </motion.button>
@@ -479,26 +479,26 @@ export default function OnboardingPage() {
                 initial="initial"
                 animate="animate"
                 exit="exit"
-                className="text-center space-y-6"
+                className="text-center space-y-4 sm:space-y-6"
               >
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-                  className="w-24 h-24 mx-auto mb-6 rounded-3xl bg-gradient-to-br from-primary via-secondary to-accent flex items-center justify-center"
+                  className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 sm:mb-6 rounded-3xl bg-gradient-to-br from-primary via-secondary to-accent flex items-center justify-center"
                 >
-                  <Sparkles className="w-12 h-12 text-white" />
+                  <Sparkles className="w-10 h-10 sm:w-12 sm:h-12 text-white" />
                 </motion.div>
                 
-                <h1 className="text-3xl font-bold mb-2">You&apos;re all set!</h1>
-                <p className="text-muted-foreground max-w-md mx-auto">
+                <h1 className="text-2xl sm:text-3xl font-bold mb-2">You&apos;re all set!</h1>
+                <p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto px-4">
                   We&apos;ve personalized your learning experience based on your preferences. 
                   Please sign in to start your journey!
                 </p>
 
-                <Card className="max-w-md mx-auto p-6 bg-gradient-to-br from-primary/5 to-secondary/5">
-                  <h3 className="font-semibold mb-4">Your Learning Profile</h3>
-                  <div className="space-y-3 text-sm text-left">
+                <Card className="max-w-md p-4 sm:p-6 bg-gradient-to-br from-primary/5 to-secondary/5 mx-4 sm:mx-auto">
+                  <h3 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Your Learning Profile</h3>
+                  <div className="space-y-2 sm:space-y-3 text-xs sm:text-sm text-left">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Interests:</span>
                       <span className="font-medium">{selectedInterests.length} topics</span>
@@ -522,10 +522,10 @@ export default function OnboardingPage() {
                   size="lg" 
                   onClick={handleComplete}
                   disabled={isSubmitting}
-                  className="mt-6"
+                  className="mt-4 sm:mt-6"
                 >
                   {isSubmitting ? 'Setting up...' : 'Continue to Sign In'}
-                  <Sparkles className="w-5 h-5 ml-2" />
+                  <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
                 </Button>
               </motion.div>
             )}
@@ -535,7 +535,7 @@ export default function OnboardingPage() {
 
       {/* Navigation buttons */}
       {currentStep !== 'complete' && (
-        <div className="max-w-3xl mx-auto w-full flex justify-between mt-8 pb-8">
+        <div className="max-w-3xl mx-auto w-full flex justify-between mt-4 sm:mt-8 pb-4 sm:pb-8 flex-shrink-0 px-2 sm:px-0">
           <Button
             variant="ghost"
             onClick={prevStep}
