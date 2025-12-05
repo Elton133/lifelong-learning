@@ -29,6 +29,7 @@ export default function VideoDemoPlayer({
   const [showResult, setShowResult] = useState(false);
   const [momentScores, setMomentScores] = useState<{ [key: number]: boolean }>({});
   const [hasWatched75Percent, setHasWatched75Percent] = useState(false);
+  const [nextMomentIndex, setNextMomentIndex] = useState(0);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -43,16 +44,15 @@ export default function VideoDemoPlayer({
         setHasWatched75Percent(true);
       }
 
-      // Check for interactive moments
-      if (config.interactive_moments && isPlaying) {
-        const moment = config.interactive_moments.find(
-          (m) => Math.abs(m.timestamp - time) < 0.5 && !momentScores[m.timestamp]
-        );
+      // Check for interactive moments using index for better performance
+      if (config.interactive_moments && isPlaying && nextMomentIndex < config.interactive_moments.length) {
+        const moment = config.interactive_moments[nextMomentIndex];
         
-        if (moment && !currentMoment) {
+        if (Math.abs(moment.timestamp - time) < 0.5 && !momentScores[moment.timestamp] && !currentMoment) {
           video.pause();
           setIsPlaying(false);
           setCurrentMoment(moment);
+          setNextMomentIndex((prev) => prev + 1);
         }
       }
     };
@@ -68,7 +68,7 @@ export default function VideoDemoPlayer({
       video.removeEventListener('timeupdate', handleTimeUpdate);
       video.removeEventListener('loadedmetadata', handleLoadedMetadata);
     };
-  }, [config.interactive_moments, currentMoment, isPlaying, momentScores, duration, hasWatched75Percent]);
+  }, [config.interactive_moments, currentMoment, isPlaying, momentScores, duration, hasWatched75Percent, nextMomentIndex]);
 
   const togglePlay = () => {
     const video = videoRef.current;

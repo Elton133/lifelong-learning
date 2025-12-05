@@ -51,6 +51,11 @@ export default function DragDropDemoPlayer({
       return;
     }
 
+    // Check if element already exists in the zone
+    if (currentItems.some((el) => el.id === draggedElement.id)) {
+      return;
+    }
+
     // Add element to zone
     setDroppedElements((prev) => ({
       ...prev,

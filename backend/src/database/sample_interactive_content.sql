@@ -129,7 +129,7 @@ INSERT INTO learning_content (
     "demo_config": {
       "demo_type": "video",
       "video_demo": {
-        "video_url": "https://www.youtube.com/watch?v=8JJ101D3knE",
+        "video_url": "https://example.com/placeholder-video.mp4",
         "allow_speed_control": true,
         "interactive_moments": [
           {

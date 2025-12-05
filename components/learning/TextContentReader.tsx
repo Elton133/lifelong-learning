@@ -14,6 +14,11 @@ interface TextContentReaderProps {
   isFullscreen: boolean;
 }
 
+// Reading completion thresholds
+const MIN_READING_TIME_MULTIPLIER = 0.5; // User must spend at least 50% of estimated time
+const QUICK_READ_SCORE = 70; // Score for users who read too quickly
+const FULL_READ_SCORE = 100; // Score for users who read thoroughly
+
 export default function TextContentReader({
   config,
   onComplete,
@@ -21,15 +26,17 @@ export default function TextContentReader({
 }: TextContentReaderProps) {
   const [currentSection, setCurrentSection] = useState(0);
   const [readSections, setReadSections] = useState<Set<number>>(new Set());
-  const startTimeRef = useRef<number>();
+  const startTimeRef = useRef<number>(0);
   const [hasCompletedReading, setHasCompletedReading] = useState(false);
-
-  if (!startTimeRef.current) {
-    startTimeRef.current = Date.now();
-  }
 
   const sections = config.sections || [];
   const hasSections = sections.length > 0;
+
+  useEffect(() => {
+    if (startTimeRef.current === 0) {
+      startTimeRef.current = Date.now();
+    }
+  }, []);
 
   useEffect(() => {
     // Track section as read when user spends time on it
@@ -57,20 +64,20 @@ export default function TextContentReader({
   };
 
   const handleComplete = () => {
-    const timeSpent = (Date.now() - (startTimeRef.current || Date.now())) / 1000 / 60; // in minutes
+    const timeSpent = (Date.now() - startTimeRef.current) / 1000 / 60; // in minutes
     const estimatedTime = config.reading_time || 5;
     
     // Calculate score based on completion and time spent
-    let score = 100;
+    let score = FULL_READ_SCORE;
     
     // If user rushes through (spends less than 50% of estimated time), reduce score
-    if (timeSpent < estimatedTime * 0.5) {
-      score = 70;
+    if (timeSpent < estimatedTime * MIN_READING_TIME_MULTIPLIER) {
+      score = QUICK_READ_SCORE;
     }
     
     // If user reads all sections thoroughly, give full score
     if (hasSections && readSections.size === sections.length) {
-      score = 100;
+      score = FULL_READ_SCORE;
     }
 
     setHasCompletedReading(true);

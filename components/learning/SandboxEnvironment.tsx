@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Play, RotateCcw, Download, Share2, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
@@ -24,11 +24,13 @@ export default function SandboxEnvironment({
   const [testResults, setTestResults] = useState<string[]>([]);
   const [hasRun, setHasRun] = useState(false);
   const [hasCompleted, setHasCompleted] = useState(false);
-  const sessionStartRef = useRef<number>();
+  const sessionStartRef = useRef<number>(0);
   
-  if (!sessionStartRef.current) {
-    sessionStartRef.current = Date.now();
-  }
+  useEffect(() => {
+    if (sessionStartRef.current === 0) {
+      sessionStartRef.current = Date.now();
+    }
+  }, []);
 
   const executeCode = async () => {
     setIsRunning(true);
@@ -104,7 +106,7 @@ export default function SandboxEnvironment({
   };
 
   const handleComplete = () => {
-    const timeSpent = (Date.now() - (sessionStartRef.current || Date.now())) / 1000 / 60; // in minutes
+    const timeSpent = (Date.now() - sessionStartRef.current) / 1000 / 60; // in minutes
     
     // Calculate score based on engagement
     let score = 100;
