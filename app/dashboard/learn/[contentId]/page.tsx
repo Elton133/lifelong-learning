@@ -12,6 +12,9 @@ import { Progress } from '@/components/ui/Progress';
 import { formatDuration, getDifficultyColor } from '@/lib/utils';
 import type { QuizQuestion } from '@/types/database';
 import VideoPlayer from '@/components/ui/VideoPlayer';
+import InteractiveDemoPlayer from '@/components/learning/InteractiveDemoPlayer';
+import TextContentReader from '@/components/learning/TextContentReader';
+import SandboxEnvironment from '@/components/learning/SandboxEnvironment';
 
 function LoadingSkeleton() {
   return (
@@ -285,13 +288,34 @@ export default function LearnPage() {
         </div>
       )}
 
-      {(content.content_type === 'interactive' || 
-        content.content_type === 'scenario' || 
-        content.content_type === 'sandbox') && (
+      {content.content_type === 'interactive' && content.content_data.demo_config && (
+        <InteractiveDemoPlayer
+          config={content.content_data.demo_config}
+          onComplete={handleComplete}
+        />
+      )}
+
+      {content.content_type === 'sandbox' && content.content_data.sandbox_config && (
+        <SandboxEnvironment
+          config={content.content_data.sandbox_config}
+          onComplete={handleComplete}
+          isFullscreen={false}
+        />
+      )}
+
+      {content.content_type === 'text' && content.content_data.text_content && (
+        <TextContentReader
+          config={content.content_data.text_content}
+          onComplete={handleComplete}
+          isFullscreen={false}
+        />
+      )}
+
+      {content.content_type === 'scenario' && (
         <Card>
           <CardContent className="py-12 text-center">
             <p className="text-muted-foreground mb-4">
-              {content.content_type.charAt(0).toUpperCase() + content.content_type.slice(1)} content player coming soon!
+              Scenario content player coming soon!
             </p>
             <Button onClick={() => handleComplete(80)}>
               Complete Session

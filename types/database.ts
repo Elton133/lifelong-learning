@@ -50,7 +50,7 @@ export interface LearningContent {
   id: string;
   title: string;
   description: string | null;
-  content_type: 'video' | 'interactive' | 'scenario' | 'sandbox' | 'quiz';
+  content_type: 'video' | 'interactive' | 'scenario' | 'sandbox' | 'quiz' | 'text';
   difficulty: 'beginner' | 'intermediate' | 'advanced';
   estimated_duration: number; // in minutes
   skill_ids: string[];
@@ -67,6 +67,8 @@ export interface ContentData {
   scenario_steps?: ScenarioStep[];
   sandbox_config?: SandboxConfig;
   interactive_elements?: InteractiveElement[];
+  demo_config?: DemoConfig;
+  text_content?: TextContent;
 }
 
 export interface QuizQuestion {
@@ -93,6 +95,94 @@ export interface SandboxConfig {
 export interface InteractiveElement {
   type: 'hotspot' | 'drag-drop' | 'fill-blank';
   data: Record<string, unknown>;
+}
+
+// Demo Configuration for Interactive Demos
+export interface DemoConfig {
+  demo_type: 'video' | 'code' | 'drag-drop' | 'simulation';
+  video_demo?: VideoDemoConfig;
+  code_demo?: CodeDemoConfig;
+  drag_drop_demo?: DragDropDemoConfig;
+}
+
+// Video Demo with interactive elements
+export interface VideoDemoConfig {
+  video_url: string;
+  interactive_moments?: InteractiveMoment[];
+  captions_url?: string;
+  allow_speed_control?: boolean;
+}
+
+export interface InteractiveMoment {
+  timestamp: number; // in seconds
+  type: 'quiz' | 'tip' | 'highlight';
+  quiz_question?: QuizQuestion;
+  tip_content?: string;
+  highlight_area?: { x: number; y: number; width: number; height: number };
+}
+
+// Code Demo for hands-on practice
+export interface CodeDemoConfig {
+  language: string;
+  starter_code: string;
+  solution_code: string;
+  test_cases?: TestCase[];
+  hints?: Hint[];
+  instructions: string;
+}
+
+export interface TestCase {
+  id: string;
+  input: string;
+  expected_output: string;
+  description: string;
+}
+
+export interface Hint {
+  id: string;
+  level: number; // 1 = gentle, 2 = more direct, 3 = solution
+  content: string;
+}
+
+// Drag & Drop Demo for simulations
+export interface DragDropDemoConfig {
+  title: string;
+  description: string;
+  elements: DraggableElement[];
+  drop_zones: DropZone[];
+  correct_mappings: { [elementId: string]: string }; // elementId -> dropZoneId
+  validation_type: 'immediate' | 'on-submit';
+}
+
+export interface DraggableElement {
+  id: string;
+  content: string;
+  type: 'text' | 'image' | 'icon';
+  image_url?: string;
+  icon_name?: string;
+}
+
+export interface DropZone {
+  id: string;
+  label: string;
+  accepts?: string[]; // types of elements it accepts
+  max_items?: number;
+}
+
+// Text Content for reading materials
+export interface TextContent {
+  content_type: 'passage' | 'pdf';
+  text_passage?: string;
+  pdf_url?: string;
+  sections?: TextSection[];
+  reading_time?: number; // estimated reading time in minutes
+}
+
+export interface TextSection {
+  id: string;
+  title: string;
+  content: string;
+  order: number;
 }
 
 export interface Playlist {
