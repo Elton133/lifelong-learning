@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS learning_content (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   title TEXT NOT NULL,
   description TEXT,
-  content_type TEXT CHECK (content_type IN ('video', 'interactive', 'scenario', 'sandbox', 'quiz')),
+  content_type TEXT CHECK (content_type IN ('video', 'interactive', 'scenario', 'sandbox', 'quiz', 'text')),
   difficulty TEXT CHECK (difficulty IN ('beginner', 'intermediate', 'advanced')),
   estimated_duration INTEGER, -- in minutes
   skill_ids UUID[] DEFAULT '{}',
