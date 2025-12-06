@@ -198,7 +198,7 @@ export default function VideoDemoPlayer({
                 {[0.5, 1, 1.5, 2].map((rate) => (
                   <Button
                     key={rate}
-                    variant={playbackRate === rate ? 'default' : 'ghost'}
+                    variant={playbackRate === rate ? 'primary' : 'ghost'}
                     size="sm"
                     onClick={() => changePlaybackRate(rate)}
                     className={playbackRate === rate ? '' : 'text-white hover:bg-white/20'}
