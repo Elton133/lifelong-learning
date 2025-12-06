@@ -75,7 +75,7 @@ export default function DashboardPage() {
 
   return (
     <>
-      {showTour && <DashboardTour onComplete={handleTourComplete} />}
+      {/* {showTour && <DashboardTour onComplete={handleTourComplete} />} */}
       
       <motion.div 
         className="space-y-6"
