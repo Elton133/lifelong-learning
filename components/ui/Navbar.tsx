@@ -38,7 +38,6 @@ export default function LifelongLearningNav() {
           <span className="font-bold text-lg text-gray-900 dark:text-white">Lifelong Learning</span>
         </Link>
 
-        {/* Desktop Links */}
         {/* <div className="hidden md:flex items-center gap-6">
           {navLinks.map((link) => (
             <Link
