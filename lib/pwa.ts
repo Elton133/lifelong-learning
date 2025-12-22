@@ -14,38 +14,39 @@ interface BeforeInstallPromptEvent extends Event {
  * Register the service worker
  */
 export async function registerServiceWorker(): Promise<ServiceWorkerRegistration | null> {
-  if ('serviceWorker' in navigator) {
-    try {
-      const registration = await navigator.serviceWorker.register('/sw.js', {
-        scope: '/',
-      });
-      
-      console.log('Service Worker registered successfully:', registration.scope);
-      
-      // Check for updates
-      registration.addEventListener('updatefound', () => {
-        const newWorker = registration.installing;
-        if (newWorker) {
-          newWorker.addEventListener('statechange', () => {
-            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              // New service worker available
-              console.log('New service worker available');
-              // Optionally show update notification to user
-              if (window.confirm('New version available! Reload to update?')) {
-                window.location.reload();
-              }
+  // SSR guard
+  if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) {
+    console.warn('Service Workers are not supported in this environment');
+    return null;
+  }
+  
+  try {
+    const registration = await navigator.serviceWorker.register('/sw.js', {
+      scope: '/',
+    });
+    
+    console.log('Service Worker registered successfully:', registration.scope);
+    
+    // Check for updates
+    registration.addEventListener('updatefound', () => {
+      const newWorker = registration.installing;
+      if (newWorker) {
+        newWorker.addEventListener('statechange', () => {
+          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            // New service worker available
+            console.log('New service worker available');
+            // Optionally show update notification to user
+            if (typeof window !== 'undefined' && window.confirm('New version available! Reload to update?')) {
+              window.location.reload();
             }
-          });
-        }
-      });
-      
-      return registration;
-    } catch (error) {
-      console.error('Service Worker registration failed:', error);
-      return null;
-    }
-  } else {
-    console.warn('Service Workers are not supported in this browser');
+          }
+        });
+      }
+    });
+    
+    return registration;
+  } catch (error) {
+    console.error('Service Worker registration failed:', error);
     return null;
   }
 }
@@ -54,11 +55,14 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
  * Unregister the service worker
  */
 export async function unregisterServiceWorker(): Promise<boolean> {
-  if ('serviceWorker' in navigator) {
-    const registration = await navigator.serviceWorker.ready;
-    return await registration.unregister();
+  // SSR guard
+  if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) {
+    console.warn('Service Worker not available');
+    return false;
   }
-  return false;
+  
+  const registration = await navigator.serviceWorker.ready;
+  return await registration.unregister();
 }
 
 /**

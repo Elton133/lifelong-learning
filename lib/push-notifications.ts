@@ -181,11 +181,14 @@ async function savePushSubscription(subscription: PushSubscription): Promise<voi
       throw new Error('User not authenticated');
     }
     
+    // SSR guard for navigator
+    const userAgent = typeof navigator !== 'undefined' ? navigator.userAgent : 'server';
+    
     const subscriptionData = {
       user_id: user.id,
       endpoint: subscription.endpoint,
       keys: subscription.toJSON().keys || {},
-      user_agent: navigator.userAgent,
+      user_agent: userAgent,
       is_active: true,
     };
     
