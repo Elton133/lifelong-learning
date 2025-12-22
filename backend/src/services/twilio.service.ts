@@ -11,18 +11,22 @@ const authToken = process.env.TWILIO_AUTH_TOKEN || '';
 const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER || '';
 const baseUrl = process.env.BACKEND_URL || 'http://localhost:4000';
 
+// Validate Twilio configuration
+const isTwilioConfigured = Boolean(accountSid && authToken && twilioPhoneNumber);
+
 // Initialize Twilio client
 let twilioClient: twilio.Twilio | null = null;
 
-try {
-  if (accountSid && authToken) {
+if (isTwilioConfigured) {
+  try {
     twilioClient = twilio(accountSid, authToken);
     console.log('Twilio client initialized successfully');
-  } else {
-    console.warn('Twilio credentials not configured. Voice calls will be disabled.');
+  } catch (error) {
+    console.error('Failed to initialize Twilio client:', error);
   }
-} catch (error) {
-  console.error('Failed to initialize Twilio client:', error);
+} else {
+  console.warn('Twilio credentials not configured. Voice calls will be disabled.');
+  console.warn('Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_PHONE_NUMBER to enable voice calls.');
 }
 
 export interface CallOptions {
@@ -50,7 +54,14 @@ export async function makeVoiceCall(
   if (!twilioClient) {
     return {
       success: false,
-      error: 'Twilio not configured',
+      error: 'Twilio not configured - voice calls are disabled',
+    };
+  }
+
+  if (!isTwilioConfigured) {
+    return {
+      success: false,
+      error: 'Twilio credentials incomplete - check TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_PHONE_NUMBER',
     };
   }
 

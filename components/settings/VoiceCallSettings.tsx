@@ -2,10 +2,17 @@
 
 import { useState, useEffect } from 'react';
 import { apiClient } from '@/lib/api';
+import type { UserPreferences } from '@/types/database';
+
+type CallPreferences = Pick<
+  UserPreferences,
+  'calls_enabled' | 'call_time_start' | 'call_time_end' | 
+  'call_frequency' | 'preferred_call_duration' | 'quiet_days'
+>;
 
 export default function VoiceCallSettings() {
   const [loading, setLoading] = useState(true);
-  const [preferences, setPreferences] = useState<Record<string, unknown>>({
+  const [preferences, setPreferences] = useState<CallPreferences>({
     calls_enabled: false,
     call_time_start: '10:00:00',
     call_time_end: '18:00:00',
@@ -31,7 +38,7 @@ export default function VoiceCallSettings() {
     }
   };
 
-  const updatePreferences = async (updates: Record<string, unknown>) => {
+  const updatePreferences = async (updates: Partial<CallPreferences>) => {
     try {
       await apiClient.patch('/api/calls/preferences', updates);
       setPreferences({ ...preferences, ...updates });
@@ -41,19 +48,21 @@ export default function VoiceCallSettings() {
   };
 
   const toggleQuietDay = async (day: string) => {
-    const quietDays = (preferences.quiet_days as string[]) || [];
-    const updated = quietDays.includes(day)
-      ? quietDays.filter(d => d !== day)
-      : [...quietDays, day];
+    const quietDays = preferences.quiet_days || [];
+    const updated: Partial<CallPreferences> = {
+      quiet_days: quietDays.includes(day)
+        ? quietDays.filter(d => d !== day)
+        : [...quietDays, day],
+    };
     
-    await updatePreferences({ quiet_days: updated });
+    await updatePreferences(updated);
   };
 
   if (loading) {
     return <div className="text-center py-8">Loading preferences...</div>;
   }
 
-  const quietDays = (preferences.quiet_days as string[]) || [];
+  const quietDays = preferences.quiet_days || [];
   const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
   return (
@@ -64,7 +73,7 @@ export default function VoiceCallSettings() {
           <label className="relative inline-flex items-center cursor-pointer">
             <input
               type="checkbox"
-              checked={preferences.calls_enabled as boolean}
+              checked={preferences.calls_enabled}
               onChange={(e) => updatePreferences({ calls_enabled: e.target.checked })}
               className="sr-only peer"
             />
@@ -72,7 +81,7 @@ export default function VoiceCallSettings() {
           </label>
         </div>
 
-        {!(preferences.calls_enabled as boolean) && (
+        {!preferences.calls_enabled && (
           <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
             <p className="text-sm text-blue-800 dark:text-blue-200">
               📞 Enable voice calls to receive personalized learning reminders and micro-lessons via phone
@@ -80,7 +89,7 @@ export default function VoiceCallSettings() {
           </div>
         )}
 
-        {(preferences.calls_enabled as boolean) && (
+        {preferences.calls_enabled && (
           <div className="space-y-4 mt-4">
             <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md">
               <p className="text-sm text-green-800 dark:text-green-200">
@@ -121,7 +130,7 @@ export default function VoiceCallSettings() {
                 Preferred Duration (seconds)
               </label>
               <select
-                value={preferences.preferred_call_duration as number}
+                value={preferences.preferred_call_duration}
                 onChange={(e) => updatePreferences({ preferred_call_duration: parseInt(e.target.value) })}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500"
               >
@@ -141,7 +150,7 @@ export default function VoiceCallSettings() {
                 <label className="block text-sm font-medium mb-2">Start Time</label>
                 <input
                   type="time"
-                  value={(preferences.call_time_start as string).slice(0, 5)}
+                  value={preferences.call_time_start.slice(0, 5)}
                   onChange={(e) => updatePreferences({ call_time_start: `${e.target.value}:00` })}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 />
@@ -150,7 +159,7 @@ export default function VoiceCallSettings() {
                 <label className="block text-sm font-medium mb-2">End Time</label>
                 <input
                   type="time"
-                  value={(preferences.call_time_end as string).slice(0, 5)}
+                  value={preferences.call_time_end.slice(0, 5)}
                   onChange={(e) => updatePreferences({ call_time_end: `${e.target.value}:00` })}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 />

@@ -8,6 +8,10 @@ import { supabase } from './supabase';
 // VAPID public key - should be set in environment variables
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || '';
 
+if (!VAPID_PUBLIC_KEY && typeof window !== 'undefined') {
+  console.warn('[Push Notifications] VAPID public key is not configured. Push notifications will be disabled.');
+}
+
 /**
  * Convert VAPID key from base64 to Uint8Array
  */

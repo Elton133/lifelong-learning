@@ -11,12 +11,16 @@ const vapidPublicKey = process.env.VAPID_PUBLIC_KEY || '';
 const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY || '';
 const vapidSubject = process.env.VAPID_SUBJECT || 'mailto:noreply@lifelonglearning.com';
 
+// Validate VAPID configuration
+const isVapidConfigured = Boolean(vapidPublicKey && vapidPrivateKey);
+
 // Configure web-push
-if (vapidPublicKey && vapidPrivateKey) {
+if (isVapidConfigured) {
   webPush.setVapidDetails(vapidSubject, vapidPublicKey, vapidPrivateKey);
   console.log('Web Push configured successfully');
 } else {
   console.warn('VAPID keys not configured. Push notifications will be disabled.');
+  console.warn('Generate VAPID keys with: npx web-push generate-vapid-keys');
 }
 
 export interface NotificationPayload {
@@ -48,6 +52,13 @@ export async function sendPushNotification(
   payload: NotificationPayload,
   supabase: SupabaseClient
 ): Promise<SendNotificationResult> {
+  if (!isVapidConfigured) {
+    return {
+      success: false,
+      error: 'Push notifications not configured - VAPID keys missing',
+    };
+  }
+
   try {
     // Get user's active push subscriptions
     const { data: subscriptions, error } = await supabase

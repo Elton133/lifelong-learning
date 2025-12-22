@@ -57,6 +57,8 @@ const INTERESTS = [
   { id: 'innovation', name: 'Innovation', icon: Lightbulb, color: 'from-yellow-500 to-amber-500' },
 ];
 
+type SettingsTab = 'profile' | 'notifications' | 'calls';
+
 // Learning goals (same as onboarding)
 const LEARNING_GOALS = [
   { id: 'career', name: 'Advance my career', description: 'Gain skills for professional growth' },
@@ -85,7 +87,7 @@ export default function SettingsPage() {
   const { profile, updateProfile, refetch } = useUser();
   const { success, error: showError } = useToast();
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'profile' | 'notifications' | 'calls'>('profile');
+  const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
   const [formData, setFormData] = useState<{
     full_name: string;
     role: string;

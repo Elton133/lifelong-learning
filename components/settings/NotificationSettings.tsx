@@ -10,10 +10,17 @@ import {
   testPushNotification
 } from '@/lib/push-notifications';
 import { apiClient } from '@/lib/api';
+import type { UserPreferences } from '@/types/database';
+
+type NotificationPreferences = Pick<
+  UserPreferences,
+  'notifications_enabled' | 'push_enabled' | 'notification_time_start' | 
+  'notification_time_end' | 'notification_types' | 'quiet_days'
+>;
 
 export default function NotificationSettings() {
   const [loading, setLoading] = useState(true);
-  const [preferences, setPreferences] = useState<Record<string, unknown>>({
+  const [preferences, setPreferences] = useState<NotificationPreferences>({
     notifications_enabled: true,
     push_enabled: true,
     notification_time_start: '09:00:00',
@@ -47,7 +54,7 @@ export default function NotificationSettings() {
     }
   };
 
-  const updatePreferences = async (updates: Record<string, unknown>) => {
+  const updatePreferences = async (updates: Partial<NotificationPreferences>) => {
     try {
       await apiClient.patch('/api/notifications/preferences', updates);
       setPreferences({ ...preferences, ...updates });
@@ -90,11 +97,10 @@ export default function NotificationSettings() {
     }
   };
 
-  const toggleNotificationType = async (type: string, enabled: boolean) => {
-    const notificationTypes = preferences.notification_types as Record<string, boolean>;
-    const updated = {
+  const toggleNotificationType = async (type: keyof UserPreferences['notification_types'], enabled: boolean) => {
+    const updated: Partial<NotificationPreferences> = {
       notification_types: {
-        ...notificationTypes,
+        ...preferences.notification_types,
         [type]: enabled,
       },
     };
@@ -102,20 +108,22 @@ export default function NotificationSettings() {
   };
 
   const toggleQuietDay = async (day: string) => {
-    const quietDays = (preferences.quiet_days as string[]) || [];
-    const updated = quietDays.includes(day)
-      ? quietDays.filter(d => d !== day)
-      : [...quietDays, day];
+    const quietDays = preferences.quiet_days || [];
+    const updated: Partial<NotificationPreferences> = {
+      quiet_days: quietDays.includes(day)
+        ? quietDays.filter(d => d !== day)
+        : [...quietDays, day],
+    };
     
-    await updatePreferences({ quiet_days: updated });
+    await updatePreferences(updated);
   };
 
   if (loading) {
     return <div className="text-center py-8">Loading preferences...</div>;
   }
 
-  const notificationTypes = preferences.notification_types as Record<string, boolean>;
-  const quietDays = (preferences.quiet_days as string[]) || [];
+  const notificationTypes = preferences.notification_types;
+  const quietDays = preferences.quiet_days || [];
   const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
   return (
@@ -198,7 +206,7 @@ export default function NotificationSettings() {
             <label className="block text-sm font-medium mb-2">Start Time</label>
             <input
               type="time"
-              value={(preferences.notification_time_start as string).slice(0, 5)}
+              value={preferences.notification_time_start.slice(0, 5)}
               onChange={(e) => updatePreferences({ notification_time_start: `${e.target.value}:00` })}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500"
             />
@@ -207,7 +215,7 @@ export default function NotificationSettings() {
             <label className="block text-sm font-medium mb-2">End Time</label>
             <input
               type="time"
-              value={(preferences.notification_time_end as string).slice(0, 5)}
+              value={preferences.notification_time_end.slice(0, 5)}
               onChange={(e) => updatePreferences({ notification_time_end: `${e.target.value}:00` })}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500"
             />
