@@ -5,6 +5,14 @@
 
 import { supabase } from './supabase';
 
+/**
+ * Extended NotificationOptions to include vibrate pattern
+ * The vibrate property is part of the Notification API but may not be in all TypeScript definitions
+ */
+interface ExtendedNotificationOptions extends NotificationOptions {
+  vibrate?: number[] | number;
+}
+
 // VAPID public key - should be set in environment variables
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || '';
 
@@ -14,22 +22,8 @@ if (!VAPID_PUBLIC_KEY && typeof window !== 'undefined') {
 
 /**
  * Convert VAPID key from base64 to Uint8Array
+ * Returns a Uint8Array with ArrayBuffer (not ArrayBufferLike) for Web API compatibility
  */
-// function urlBase64ToUint8Array(base64String: string): Uint8Array {
-//   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
-//   const base64 = (base64String + padding)
-//     .replace(/\-/g, '+')
-//     .replace(/_/g, '/');
-  
-//   const rawData = window.atob(base64);
-//   const outputArray = new Uint8Array(rawData.length);
-  
-//   for (let i = 0; i < rawData.length; ++i) {
-//     outputArray[i] = rawData.charCodeAt(i);
-//   }
-  
-//   return outputArray;
-// }
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
   if (typeof window === 'undefined') {
     throw new Error('Push notifications are only supported in the browser');
@@ -41,8 +35,8 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
     .replace(/_/g, '/');
 
   const rawData = window.atob(base64);
-  const buffer = new ArrayBuffer(rawData.length);
-  const outputArray = new Uint8Array(buffer);
+  // Create a new Uint8Array directly from length, which will have ArrayBuffer as buffer type
+  const outputArray = new Uint8Array(rawData.length);
 
   for (let i = 0; i < rawData.length; i++) {
     outputArray[i] = rawData.charCodeAt(i);
@@ -56,6 +50,11 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
  * Check if push notifications are supported
  */
 export function isPushNotificationSupported(): boolean {
+  // SSR guard
+  if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+    return false;
+  }
+  
   return 'serviceWorker' in navigator && 'PushManager' in window;
 }
 
@@ -63,7 +62,8 @@ export function isPushNotificationSupported(): boolean {
  * Get current notification permission status
  */
 export function getNotificationPermission(): NotificationPermission {
-  if (!('Notification' in window)) {
+  // SSR guard
+  if (typeof window === 'undefined' || !('Notification' in window)) {
     return 'denied';
   }
   return Notification.permission;
@@ -73,7 +73,8 @@ export function getNotificationPermission(): NotificationPermission {
  * Request notification permission
  */
 export async function requestNotificationPermission(): Promise<NotificationPermission> {
-  if (!('Notification' in window)) {
+  // SSR guard
+  if (typeof window === 'undefined' || !('Notification' in window)) {
     console.warn('Notifications not supported');
     return 'denied';
   }
@@ -100,10 +101,14 @@ export async function subscribeToPushNotifications(): Promise<PushSubscription |
     let subscription = await registration.pushManager.getSubscription();
     
     if (!subscription) {
+      // Convert VAPID key - Uint8Array created directly has ArrayBuffer as buffer type
+      const applicationServerKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
+      
       // Create new subscription
+      // Type assertion needed due to TypeScript's strict ArrayBuffer vs ArrayBufferLike distinction
       subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+        applicationServerKey: applicationServerKey as BufferSource,
       });
       
       console.log('Push subscription created:', subscription);
@@ -229,9 +234,10 @@ async function removePushSubscription(endpoint: string): Promise<void> {
  */
 export async function showLocalNotification(
   title: string,
-  options?: NotificationOptions
+  options?: ExtendedNotificationOptions
 ): Promise<void> {
-  if (!('Notification' in window)) {
+  // SSR guard
+  if (typeof window === 'undefined' || !('Notification' in window)) {
     console.warn('Notifications not supported');
     return;
   }
@@ -243,13 +249,19 @@ export async function showLocalNotification(
     }
   }
   
+  // Additional guard for service worker
+  if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) {
+    console.warn('Service Worker not available');
+    return;
+  }
+  
   const registration = await navigator.serviceWorker.ready;
   await registration.showNotification(title, {
     icon: '/icons/icon-192x192.png',
     badge: '/icons/icon-96x96.png',
     vibrate: [200, 100, 200],
     ...options,
-  });
+  } as NotificationOptions);
 }
 
 /**
