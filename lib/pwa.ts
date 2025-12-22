@@ -14,38 +14,39 @@ interface BeforeInstallPromptEvent extends Event {
  * Register the service worker
  */
 export async function registerServiceWorker(): Promise<ServiceWorkerRegistration | null> {
-  if ('serviceWorker' in navigator) {
-    try {
-      const registration = await navigator.serviceWorker.register('/sw.js', {
-        scope: '/',
-      });
-      
-      console.log('Service Worker registered successfully:', registration.scope);
-      
-      // Check for updates
-      registration.addEventListener('updatefound', () => {
-        const newWorker = registration.installing;
-        if (newWorker) {
-          newWorker.addEventListener('statechange', () => {
-            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              // New service worker available
-              console.log('New service worker available');
-              // Optionally show update notification to user
-              if (window.confirm('New version available! Reload to update?')) {
-                window.location.reload();
-              }
+  // SSR guard
+  if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) {
+    console.warn('Service Workers are not supported in this environment');
+    return null;
+  }
+  
+  try {
+    const registration = await navigator.serviceWorker.register('/sw.js', {
+      scope: '/',
+    });
+    
+    console.log('Service Worker registered successfully:', registration.scope);
+    
+    // Check for updates
+    registration.addEventListener('updatefound', () => {
+      const newWorker = registration.installing;
+      if (newWorker) {
+        newWorker.addEventListener('statechange', () => {
+          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            // New service worker available
+            console.log('New service worker available');
+            // Optionally show update notification to user
+            if (typeof window !== 'undefined' && window.confirm('New version available! Reload to update?')) {
+              window.location.reload();
             }
-          });
-        }
-      });
-      
-      return registration;
-    } catch (error) {
-      console.error('Service Worker registration failed:', error);
-      return null;
-    }
-  } else {
-    console.warn('Service Workers are not supported in this browser');
+          }
+        });
+      }
+    });
+    
+    return registration;
+  } catch (error) {
+    console.error('Service Worker registration failed:', error);
     return null;
   }
 }
@@ -54,17 +55,25 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
  * Unregister the service worker
  */
 export async function unregisterServiceWorker(): Promise<boolean> {
-  if ('serviceWorker' in navigator) {
-    const registration = await navigator.serviceWorker.ready;
-    return await registration.unregister();
+  // SSR guard
+  if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) {
+    console.warn('Service Worker not available');
+    return false;
   }
-  return false;
+  
+  const registration = await navigator.serviceWorker.ready;
+  return await registration.unregister();
 }
 
 /**
  * Check if PWA is already installed
  */
 export function isPWAInstalled(): boolean {
+  // SSR guard
+  if (typeof window === 'undefined') {
+    return false;
+  }
+  
   // Check if running in standalone mode
   if (window.matchMedia('(display-mode: standalone)').matches) {
     return true;
@@ -84,6 +93,12 @@ export function isPWAInstalled(): boolean {
 export function setupInstallPrompt(
   onPromptAvailable: (prompt: BeforeInstallPromptEvent) => void
 ): void {
+  // SSR guard
+  if (typeof window === 'undefined') {
+    console.warn('setupInstallPrompt called on server-side, skipping');
+    return;
+  }
+  
   window.addEventListener('beforeinstallprompt', (e: Event) => {
     // Prevent the default prompt
     e.preventDefault();
@@ -149,6 +164,11 @@ async function trackPWAInstall(): Promise<void> {
  * Get current platform
  */
 function getPlatform(): string {
+  // SSR guard
+  if (typeof navigator === 'undefined') {
+    return 'server';
+  }
+  
   const userAgent = navigator.userAgent.toLowerCase();
   
   if (/android/.test(userAgent)) {
@@ -170,18 +190,27 @@ function getPlatform(): string {
  * Clear all caches
  */
 export async function clearCaches(): Promise<void> {
-  if ('caches' in window) {
-    const cacheNames = await caches.keys();
-    await Promise.all(cacheNames.map(name => caches.delete(name)));
-    console.log('All caches cleared');
+  // SSR guard
+  if (typeof window === 'undefined' || !('caches' in window)) {
+    console.warn('Cache API not available');
+    return;
   }
+  
+  const cacheNames = await caches.keys();
+  await Promise.all(cacheNames.map(name => caches.delete(name)));
+  console.log('All caches cleared');
 }
 
 /**
  * Send message to service worker
  */
 export function sendMessageToSW(message: unknown): void {
-  if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+  if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) {
+    console.warn('Service Worker not available');
+    return;
+  }
+  
+  if (navigator.serviceWorker.controller) {
     navigator.serviceWorker.controller.postMessage(message);
   }
 }
@@ -190,6 +219,11 @@ export function sendMessageToSW(message: unknown): void {
  * Check if online
  */
 export function isOnline(): boolean {
+  // SSR guard - return true when navigator is not available (server or non-browser environment)
+  if (typeof navigator === 'undefined') {
+    return true;
+  }
+  
   return navigator.onLine;
 }
 
@@ -200,6 +234,12 @@ export function setupNetworkListeners(
   onOnline: () => void,
   onOffline: () => void
 ): () => void {
+  // SSR guard
+  if (typeof window === 'undefined') {
+    console.warn('setupNetworkListeners called on server-side, skipping');
+    return () => {}; // Return empty cleanup function
+  }
+  
   window.addEventListener('online', onOnline);
   window.addEventListener('offline', onOffline);
   
