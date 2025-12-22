@@ -291,3 +291,100 @@ export interface SkillGraphNode {
   connections: string[];
   last_practiced: string | null;
 }
+
+// ============================================================================
+// PWA, Push Notifications, and Voice Calls Types
+// ============================================================================
+
+export interface UserPreferences {
+  id: string;
+  user_id: string;
+  // Notification preferences
+  notifications_enabled: boolean;
+  push_enabled: boolean;
+  notification_time_start: string; // HH:MM:SS format
+  notification_time_end: string;
+  notification_types: {
+    lesson_reminders: boolean;
+    new_content: boolean;
+    achievements: boolean;
+    insights: boolean;
+  };
+  // Voice call preferences
+  calls_enabled: boolean;
+  call_time_start: string;
+  call_time_end: string;
+  call_frequency: 'daily' | 'weekly' | 'biweekly' | 'never';
+  preferred_call_duration: number;
+  // General preferences
+  timezone: string;
+  quiet_days: string[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PushSubscription {
+  id: string;
+  user_id: string;
+  endpoint: string;
+  keys: {
+    p256dh: string;
+    auth: string;
+  };
+  user_agent: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface NotificationLog {
+  id: string;
+  user_id: string;
+  notification_type: 'push' | 'email' | 'sms';
+  category: string | null;
+  title: string | null;
+  message: string | null;
+  sent_at: string;
+  delivered: boolean;
+  clicked: boolean;
+  clicked_at: string | null;
+  metadata: Record<string, unknown>;
+}
+
+export interface CallLog {
+  id: string;
+  user_id: string;
+  call_type: 'reminder' | 'micro_lesson';
+  call_sid: string | null;
+  phone_number: string | null;
+  content_id: string | null;
+  status: 'queued' | 'initiated' | 'ringing' | 'in_progress' | 'completed' | 'failed' | 'no_answer' | 'busy' | 'canceled';
+  duration: number | null;
+  audio_url: string | null;
+  call_data: Record<string, unknown>;
+  created_at: string;
+  completed_at: string | null;
+  user_responded: boolean;
+  response_data: Record<string, unknown> | null;
+}
+
+export interface PwaInstallation {
+  id: string;
+  user_id: string;
+  platform: string | null;
+  installed_at: string;
+  last_used_at: string;
+  is_active: boolean;
+}
+
+export interface ScheduledEvent {
+  id: string;
+  user_id: string;
+  event_type: 'notification' | 'call';
+  category: string | null;
+  scheduled_for: string;
+  status: 'pending' | 'processing' | 'completed' | 'failed' | 'canceled';
+  payload: Record<string, unknown>;
+  created_at: string;
+  processed_at: string | null;
+}

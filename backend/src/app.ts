@@ -9,6 +9,9 @@ import contentRoutes from './routes/content.routes';
 import playlistsRoutes from './routes/playlists.routes';
 import sessionsRoutes from './routes/sessions.routes';
 import insightsRoutes from './routes/insights.routes';
+import notificationsRoutes from './routes/notifications.routes';
+import callsRoutes from './routes/calls.routes';
+import pwaRoutes from './routes/pwa.routes';
 
 const app = express();
 
@@ -44,6 +47,9 @@ app.use('/api/content', contentRoutes);
 app.use('/api/playlists', playlistsRoutes);
 app.use('/api/sessions', sessionsRoutes);
 app.use('/api/insights', insightsRoutes);
+app.use('/api/notifications', notificationsRoutes);
+app.use('/api/calls', callsRoutes);
+app.use('/api/pwa', pwaRoutes);
 
 // Error handling middleware
 app.use((err: Error, req: express.Request, res: express.Response, _next: express.NextFunction) => {

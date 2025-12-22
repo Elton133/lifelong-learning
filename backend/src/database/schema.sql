@@ -221,3 +221,157 @@ BEGIN
   WHERE id = user_id;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- ============================================================================
+-- PWA, Push Notifications, and Voice Calls Tables
+-- ============================================================================
+
+-- User notification and call preferences
+CREATE TABLE IF NOT EXISTS user_preferences (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE UNIQUE,
+  -- Notification preferences
+  notifications_enabled BOOLEAN DEFAULT TRUE,
+  push_enabled BOOLEAN DEFAULT TRUE,
+  notification_time_start TIME DEFAULT '09:00:00',
+  notification_time_end TIME DEFAULT '21:00:00',
+  notification_types JSONB DEFAULT '{"lesson_reminders": true, "new_content": true, "achievements": true, "insights": true}'::jsonb,
+  -- Voice call preferences
+  calls_enabled BOOLEAN DEFAULT FALSE,
+  call_time_start TIME DEFAULT '10:00:00',
+  call_time_end TIME DEFAULT '18:00:00',
+  call_frequency TEXT CHECK (call_frequency IN ('daily', 'weekly', 'biweekly', 'never')) DEFAULT 'never',
+  preferred_call_duration INTEGER DEFAULT 60, -- in seconds
+  -- General preferences
+  timezone TEXT DEFAULT 'UTC',
+  quiet_days TEXT[] DEFAULT '{}', -- Days of week to skip notifications (e.g., ['saturday', 'sunday'])
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Push notification subscriptions
+CREATE TABLE IF NOT EXISTS push_subscriptions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  endpoint TEXT NOT NULL,
+  keys JSONB NOT NULL, -- Contains p256dh and auth keys
+  user_agent TEXT,
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(user_id, endpoint)
+);
+
+-- Notification logs for tracking and analytics
+CREATE TABLE IF NOT EXISTS notification_logs (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  notification_type TEXT CHECK (notification_type IN ('push', 'email', 'sms')) DEFAULT 'push',
+  category TEXT, -- 'lesson_reminder', 'new_content', 'achievement', etc.
+  title TEXT,
+  message TEXT,
+  sent_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  delivered BOOLEAN DEFAULT FALSE,
+  clicked BOOLEAN DEFAULT FALSE,
+  clicked_at TIMESTAMP WITH TIME ZONE,
+  metadata JSONB DEFAULT '{}'::jsonb
+);
+
+-- Voice call logs for tracking and analytics
+CREATE TABLE IF NOT EXISTS call_logs (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  call_type TEXT CHECK (call_type IN ('reminder', 'micro_lesson')) NOT NULL,
+  call_sid TEXT, -- Twilio Call SID
+  phone_number TEXT,
+  content_id UUID REFERENCES learning_content(id),
+  status TEXT CHECK (status IN ('queued', 'initiated', 'ringing', 'in_progress', 'completed', 'failed', 'no_answer', 'busy', 'canceled')) DEFAULT 'queued',
+  duration INTEGER, -- in seconds
+  audio_url TEXT, -- URL to the audio file used
+  call_data JSONB DEFAULT '{}'::jsonb, -- Additional call metadata
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  completed_at TIMESTAMP WITH TIME ZONE,
+  user_responded BOOLEAN DEFAULT FALSE,
+  response_data JSONB -- User interaction data during the call
+);
+
+-- PWA installation tracking
+CREATE TABLE IF NOT EXISTS pwa_installations (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  platform TEXT, -- 'android', 'ios', 'desktop'
+  installed_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  last_used_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  is_active BOOLEAN DEFAULT TRUE
+);
+
+-- Scheduled notifications/calls queue
+CREATE TABLE IF NOT EXISTS scheduled_events (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  event_type TEXT CHECK (event_type IN ('notification', 'call')) NOT NULL,
+  category TEXT, -- 'inactivity', 'new_lesson', 'goal_reminder', 'micro_lesson'
+  scheduled_for TIMESTAMP WITH TIME ZONE NOT NULL,
+  status TEXT CHECK (status IN ('pending', 'processing', 'completed', 'failed', 'canceled')) DEFAULT 'pending',
+  payload JSONB DEFAULT '{}'::jsonb,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  processed_at TIMESTAMP WITH TIME ZONE
+);
+
+-- Create indexes for performance
+CREATE INDEX IF NOT EXISTS idx_user_preferences_user_id ON user_preferences(user_id);
+CREATE INDEX IF NOT EXISTS idx_push_subscriptions_user_id ON push_subscriptions(user_id);
+CREATE INDEX IF NOT EXISTS idx_push_subscriptions_active ON push_subscriptions(is_active);
+CREATE INDEX IF NOT EXISTS idx_notification_logs_user_id ON notification_logs(user_id);
+CREATE INDEX IF NOT EXISTS idx_notification_logs_sent ON notification_logs(sent_at);
+CREATE INDEX IF NOT EXISTS idx_call_logs_user_id ON call_logs(user_id);
+CREATE INDEX IF NOT EXISTS idx_call_logs_created ON call_logs(created_at);
+CREATE INDEX IF NOT EXISTS idx_scheduled_events_user_id ON scheduled_events(user_id);
+CREATE INDEX IF NOT EXISTS idx_scheduled_events_scheduled ON scheduled_events(scheduled_for);
+CREATE INDEX IF NOT EXISTS idx_scheduled_events_status ON scheduled_events(status);
+
+-- RLS Policies for new tables
+ALTER TABLE user_preferences ENABLE ROW LEVEL SECURITY;
+ALTER TABLE push_subscriptions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE notification_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE call_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE pwa_installations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE scheduled_events ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view own preferences" ON user_preferences FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can update own preferences" ON user_preferences FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "Users can insert own preferences" ON user_preferences FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can manage own push subscriptions" ON push_subscriptions FOR ALL USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can view own notification logs" ON notification_logs FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can view own call logs" ON call_logs FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can manage own PWA installations" ON pwa_installations FOR ALL USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can view own scheduled events" ON scheduled_events FOR SELECT USING (auth.uid() = user_id);
+
+-- Trigger to create default preferences for new users
+CREATE OR REPLACE FUNCTION public.create_default_preferences()
+RETURNS trigger AS $$
+BEGIN
+  INSERT INTO public.user_preferences (user_id)
+  VALUES (NEW.id)
+  ON CONFLICT (user_id) DO NOTHING;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS on_profile_created_preferences ON profiles;
+CREATE TRIGGER on_profile_created_preferences
+  AFTER INSERT ON profiles
+  FOR EACH ROW EXECUTE FUNCTION public.create_default_preferences();
+
+-- Trigger to update updated_at on preferences
+CREATE TRIGGER update_user_preferences_updated_at
+  BEFORE UPDATE ON user_preferences
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_push_subscriptions_updated_at
+  BEFORE UPDATE ON push_subscriptions
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
