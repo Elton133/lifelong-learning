@@ -219,7 +219,7 @@ export function sendMessageToSW(message: unknown): void {
  * Check if online
  */
 export function isOnline(): boolean {
-  // SSR guard - assume online on server
+  // SSR guard - return true when navigator is not available (server or non-browser environment)
   if (typeof navigator === 'undefined') {
     return true;
   }

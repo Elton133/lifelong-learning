@@ -23,6 +23,10 @@ if (!VAPID_PUBLIC_KEY && typeof window !== 'undefined') {
 /**
  * Convert VAPID key from base64 to Uint8Array
  * Returns a Uint8Array with ArrayBuffer (not ArrayBufferLike) for Web API compatibility
+ * 
+ * Note: TypeScript's lib.dom.d.ts has strict ArrayBuffer vs ArrayBufferLike distinction.
+ * At runtime, Uint8Array always has ArrayBuffer as its buffer type, but TypeScript infers
+ * it as ArrayBufferLike. The type assertion at the call site is safe and necessary.
  */
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
   if (typeof window === 'undefined') {
@@ -105,7 +109,9 @@ export async function subscribeToPushNotifications(): Promise<PushSubscription |
       const applicationServerKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
       
       // Create new subscription
-      // Type assertion needed due to TypeScript's strict ArrayBuffer vs ArrayBufferLike distinction
+      // Type assertion (as BufferSource) is necessary due to TypeScript's strict ArrayBuffer vs
+      // ArrayBufferLike distinction. At runtime, Uint8Array.buffer is always ArrayBuffer, making
+      // this assertion safe and spec-compliant per the Web Push API specification.
       subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: applicationServerKey as BufferSource,
@@ -259,6 +265,9 @@ export async function showLocalNotification(
   }
   
   const registration = await navigator.serviceWorker.ready;
+  // Type assertion is necessary because ExtendedNotificationOptions includes 'vibrate' which
+  // is a valid Notifications API property but may not be in all TypeScript lib.dom.d.ts versions.
+  // At runtime, the browser's showNotification accepts all valid NotificationOptions including vibrate.
   await registration.showNotification(title, {
     icon: '/icons/icon-192x192.png',
     badge: '/icons/icon-96x96.png',
