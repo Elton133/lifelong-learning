@@ -24,7 +24,9 @@ import {
   Users,
   MessageCircle,
   Brain,
-  Lightbulb
+  Lightbulb,
+  Bell,
+  Phone
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -32,6 +34,8 @@ import { useUser } from '@/hooks/useUser';
 import { useToast } from '@/contexts/ToastContext';
 import { cn } from '@/lib/utils';
 import type { Profile, CareerGoal } from '@/types/database';
+import NotificationSettings from '@/components/settings/NotificationSettings';
+import VoiceCallSettings from '@/components/settings/VoiceCallSettings';
 
 // Interest categories with icons (same as onboarding)
 const INTERESTS = [
@@ -81,6 +85,7 @@ export default function SettingsPage() {
   const { profile, updateProfile, refetch } = useUser();
   const { success, error: showError } = useToast();
   const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<'profile' | 'notifications' | 'calls'>('profile');
   const [formData, setFormData] = useState<{
     full_name: string;
     role: string;
@@ -204,7 +209,75 @@ export default function SettingsPage() {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Tabs */}
+      <div className="flex gap-2 border-b border-border">
+        <button
+          onClick={() => setActiveTab('profile')}
+          className={cn(
+            'px-4 py-2 font-medium transition-colors relative',
+            activeTab === 'profile'
+              ? 'text-primary'
+              : 'text-muted-foreground hover:text-foreground'
+          )}
+        >
+          <div className="flex items-center gap-2">
+            <User className="w-4 h-4" />
+            Profile
+          </div>
+          {activeTab === 'profile' && (
+            <motion.div
+              layoutId="activeTab"
+              className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
+            />
+          )}
+        </button>
+
+        <button
+          onClick={() => setActiveTab('notifications')}
+          className={cn(
+            'px-4 py-2 font-medium transition-colors relative',
+            activeTab === 'notifications'
+              ? 'text-primary'
+              : 'text-muted-foreground hover:text-foreground'
+          )}
+        >
+          <div className="flex items-center gap-2">
+            <Bell className="w-4 h-4" />
+            Notifications
+          </div>
+          {activeTab === 'notifications' && (
+            <motion.div
+              layoutId="activeTab"
+              className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
+            />
+          )}
+        </button>
+
+        <button
+          onClick={() => setActiveTab('calls')}
+          className={cn(
+            'px-4 py-2 font-medium transition-colors relative',
+            activeTab === 'calls'
+              ? 'text-primary'
+              : 'text-muted-foreground hover:text-foreground'
+          )}
+        >
+          <div className="flex items-center gap-2">
+            <Phone className="w-4 h-4" />
+            Voice Calls
+          </div>
+          {activeTab === 'calls' && (
+            <motion.div
+              layoutId="activeTab"
+              className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
+            />
+          )}
+        </button>
+      </div>
+
+      {/* Tab Content */}
+      {activeTab === 'profile' && (
+        <form onSubmit={handleSubmit} className="space-y-6">
         {/* Personal Information */}
         <Card variant="elevated">
           <CardHeader>
@@ -450,6 +523,11 @@ export default function SettingsPage() {
           </Button>
         </div>
       </form>
+      )}
+
+      {activeTab === 'notifications' && <NotificationSettings />}
+      
+      {activeTab === 'calls' && <VoiceCallSettings />}
     </div>
   );
 }
