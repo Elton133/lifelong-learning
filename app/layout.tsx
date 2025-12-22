@@ -46,6 +46,7 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icons/icon-152x152.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Lifelong Learning" />
       </head>
       <body className="antialiased font-sans">
         <ThemeProvider>

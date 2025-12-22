@@ -328,7 +328,7 @@ export async function canReceiveCalls(
 
     // Check if current time is within allowed window
     const now = new Date();
-    const currentDay = now.toLocaleDateString('en-US', { weekday: 'lowercase' });
+    const currentDay = now.toLocaleDateString('en-US', { weekday: 'short' }).toLowerCase();
 
     // Check quiet days
     if (preferences.quiet_days && preferences.quiet_days.includes(currentDay)) {

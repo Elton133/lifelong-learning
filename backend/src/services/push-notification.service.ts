@@ -316,10 +316,10 @@ export async function canReceiveNotifications(
 
     // Check if current time is within allowed window
     const now = new Date();
-    const currentDay = now.toLocaleDateString('en-US', { weekday: 'lowercase' });
+    const currentDay = now.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
 
     // Check quiet days
-    if (preferences.quiet_days && preferences.quiet_days.includes(currentDay)) {
+    if (preferences.quiet_days && preferences.quiet_days.includes(currentDay.toLowerCase())) {
       return false;
     }
 
