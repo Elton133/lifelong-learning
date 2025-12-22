@@ -1,0 +1,15 @@
+<svg width="512" height="512" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" fill="#3b82f6"/>
+  <g transform="translate(256, 256)">
+    <!-- Book icon representing learning -->
+    <path d="M-80,-100 L-80,100 L80,100 L80,-100 Z" fill="none" stroke="white" stroke-width="16"/>
+    <line x1="-80" y1="-60" x2="80" y2="-60" stroke="white" stroke-width="8"/>
+    <line x1="-80" y1="-20" x2="80" y2="-20" stroke="white" stroke-width="8"/>
+    <line x1="-80" y1="20" x2="80" y2="20" stroke="white" stroke-width="8"/>
+    <line x1="-80" y1="60" x2="80" y2="60" stroke="white" stroke-width="8"/>
+    <!-- Graduation cap element -->
+    <path d="M-60,-120 L0,-140 L60,-120 L60,-100 L0,-80 L-60,-100 Z" fill="white"/>
+    <circle cx="0" cy="-110" r="12" fill="#3b82f6"/>
+  </g>
+  <text x="256" y="450" font-family="Arial, sans-serif" font-size="48" fill="white" text-anchor="middle" font-weight="bold">LEARN</text>
+</svg>
