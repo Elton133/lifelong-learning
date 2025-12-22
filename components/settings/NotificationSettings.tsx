@@ -190,7 +190,7 @@ export default function NotificationSettings() {
               <input
                 type="checkbox"
                 checked={enabled}
-                onChange={(e) => toggleNotificationType(type, e.target.checked)}
+                onChange={(e) => toggleNotificationType(type as keyof UserPreferences['notification_types'], e.target.checked)}
                 className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
               />
             </label>

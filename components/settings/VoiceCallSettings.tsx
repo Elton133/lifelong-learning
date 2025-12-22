@@ -113,7 +113,9 @@ export default function VoiceCallSettings() {
                     name="frequency"
                     value={freq}
                     checked={preferences.call_frequency === freq}
-                    onChange={(e) => updatePreferences({ call_frequency: e.target.value })}
+                    onChange={(e) => updatePreferences({ call_frequency: e.target.value as | 'daily'| 'weekly'
+        | 'biweekly'
+        | 'never', })}
                     className="w-4 h-4 text-blue-600 focus:ring-blue-500"
                   />
                   <span className="ml-2 text-sm capitalize">{freq}</span>
